@@ -1,0 +1,47 @@
+spring:
+  application:
+    version: @project.version@
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+time-zone: GMT+8
+dynamic-aop:
+  point-cut:
+    controller: execution(public ricciliao.common.component.response.ResponseVo ricciliao.cache.controller.*.*(..))
+redis:
+  host: 192.168.165.34
+  port: 6379
+  password: asl123456
+  db:
+    bsm:
+      consumer: bsm
+      captcha:
+        identifier: captcha
+        database: 1
+        timeout: 60000
+        ttl: 300000
+        pool:
+          min-idle: 2
+          max-idle: 5
+          max-total: 20
+      email:
+        identifier: email
+        database: 2
+        timeout: 60000
+        ttl: 300000
+        pool:
+          min-idle: 2
+          max-idle: 5
+          max-total: 20
+    message:
+      consumer: message
+      code:
+        identifier: code
+        database: 3
+        timeout: 60000
+        ttl: 300000
+        pool:
+          min-idle: 2
+          max-idle: 5
+          max-total: 20
+
