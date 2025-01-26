@@ -15,11 +15,11 @@ import java.util.TimeZone;
 @Configuration
 public class CacheProviderBeanConfig {
 
-    private ApplicationProperties applicationProperties;
+    private CacheProviderProps applicationProperties;
 
     @Autowired
-    public void setApplicationProperties(ApplicationProperties applicationProperties) {
-        this.applicationProperties = applicationProperties;
+    public void setApplicationProperties(CacheProviderProps cacheProviderProps) {
+        this.applicationProperties = cacheProviderProps;
     }
 
     @Bean

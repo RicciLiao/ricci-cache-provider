@@ -11,13 +11,13 @@ public class MessageRedisConfig extends StringRedisWrapperConfig {
 
     public MessageRedisConfig(@Autowired RedisCacheProvider cacheProvider,
                               @Autowired ObjectMapper objectMapper,
-                              @Autowired ApplicationProperties applicationProperties) {
-        super(cacheProvider, objectMapper, applicationProperties);
+                              @Autowired CacheProviderProps cacheProviderProps) {
+        super(cacheProvider, objectMapper, cacheProviderProps);
     }
 
     @Override
     public void createWrappers() {
-        this.createWrapper(MessageCodeBo.class, applicationProperties.getMessageRedisProps());
+        this.createWrapper(MessageCodeBo.class, cacheProviderProps.getMessageRedisProps());
     }
 
 }

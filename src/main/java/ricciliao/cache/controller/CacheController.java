@@ -3,14 +3,12 @@ package ricciliao.cache.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import ricciliao.cache.pojo.bo.WrapperIdentifierBo;
 import ricciliao.cache.service.CacheService;
-import ricciliao.common.component.cache.ConsumerIdentifierDto;
 import ricciliao.common.component.cache.ConsumerOperationDto;
 import ricciliao.common.component.cache.RedisCacheBo;
 import ricciliao.common.component.exception.CmnException;
@@ -32,15 +30,16 @@ public class CacheController {
 
     @Operation(description = "Will create a new record for consumer.")
     @PostMapping("/operation")
-    public ResponseVo<ResponseData> create(@ModelAttribute ConsumerIdentifierDto identifier,
-                                           ConsumerOperationDto<RedisCacheBo> operation) throws CmnException {
+    public ResponseVo<ResponseData> create(@RequestHeader(name = "consumer") String consumer,
+                                           @RequestHeader(name = "identifier") String identifier,
+                                           @RequestBody ConsumerOperationDto<? extends RedisCacheBo> operation) throws CmnException {
 
         return ResponseUtils.successResponse(
-                new ResponseSimpleData.BooleanResult(redisCacheService.create(identifier, operation))
+                new ResponseSimpleData.BooleanResult(redisCacheService.create(WrapperIdentifierBo.i(consumer, identifier), operation))
         );
     }
 
-    @Operation(description = "Will update a existed record for consumer.")
+    /*@Operation(description = "Will update a existed record for consumer.")
     @PutMapping("/operation")
     public ResponseVo<ResponseData> update(@ModelAttribute ConsumerIdentifierDto identifier,
                                            ConsumerOperationDto<? extends RedisCacheBo> operation) {
@@ -62,6 +61,6 @@ public class CacheController {
                                         ConsumerOperationDto<? extends RedisCacheBo> operation) {
 
         return ResponseUtils.successResponse();
-    }
+    }*/
 
 }

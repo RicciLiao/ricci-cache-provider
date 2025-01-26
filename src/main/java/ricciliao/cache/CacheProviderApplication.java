@@ -8,12 +8,16 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import ricciliao.cache.component.ConsumeOperationDtoConverter;
+import ricciliao.cache.component.ConsumeOperationInterceptor;
 import ricciliao.cache.component.RedisCacheProvider;
-import ricciliao.cache.component.ConsumeOperationDtoResolver;
 
 import java.util.List;
+
 
 @SpringBootApplication(exclude = {
         RedisAutoConfiguration.class,
@@ -40,8 +44,18 @@ public class CacheProviderApplication extends SpringBootServletInitializer imple
     }
 
     @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(0, new ConsumeOperationDtoConverter(objectMapper, cacheProvider));
+    }
+
+    @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new ConsumeOperationDtoResolver(objectMapper, cacheProvider));
+        //resolvers.add(new ConsumeOperationDtoResolver(objectMapper, cacheProvider));
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new ConsumeOperationInterceptor());
     }
 
     public static void main(String[] args) {

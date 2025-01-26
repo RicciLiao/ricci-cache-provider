@@ -6,15 +6,15 @@ import ricciliao.common.component.cache.RedisCacheBo;
 
 import java.time.Duration;
 
-public record StringRedisTemplateWrapper<T extends RedisCacheBo>(RedisTemplate<String, T> redisTemplate,
-                                                                 Duration ttl) {
+public record StringRedisTemplateWrapper(RedisTemplate<String, RedisCacheBo> redisTemplate,
+                                         Duration ttl) {
 
-    public void set(String key, T value) {
+    public void set(String key, RedisCacheBo value) {
 
         redisTemplate.opsForValue().set(key, value, ttl);
     }
 
-    public T get(String key) {
+    public RedisCacheBo get(String key) {
 
         return redisTemplate.opsForValue().get(key);
     }

@@ -21,36 +21,36 @@ public abstract class StringRedisWrapperConfig {
 
     private final RedisCacheProvider cacheProvider;
     private final ObjectMapper objectMapper;
-    protected final ApplicationProperties applicationProperties;
+    protected final CacheProviderProps cacheProviderProps;
 
-    public StringRedisWrapperConfig(RedisCacheProvider cacheProvider,
+    protected StringRedisWrapperConfig(RedisCacheProvider cacheProvider,
                                     ObjectMapper objectMapper,
-                                    ApplicationProperties applicationProperties) {
+                                    CacheProviderProps applicationProperties) {
         this.cacheProvider = cacheProvider;
         this.objectMapper = objectMapper;
-        this.applicationProperties = applicationProperties;
+        this.cacheProviderProps = applicationProperties;
         this.createWrappers();
     }
 
     public abstract void createWrappers();
 
     public <T extends RedisCacheBo> void createWrapper(Class<T> tClass,
-                                                       RedisPropsBo props) {
-        cacheProvider.getWrapperMap().put(
+                              RedisPropsBo props) {
+        cacheProvider.getProviderMap().put(
                 props.identifier,
-                new StringRedisTemplateWrapper<>(
+                new StringRedisTemplateWrapper(
                         createRedisTemplate(tClass, props),
                         props.ttl
                 )
         );
-        cacheProvider.getClassMap().put(
+        cacheProvider.getCacheClass().put(
                 props.identifier,
                 tClass
         );
     }
 
-    private <T extends RedisCacheBo> RedisTemplate<String, T> createRedisTemplate(Class<T> tClass,
-                                                                                  RedisPropsBo props) {
+    private <T extends RedisCacheBo> RedisTemplate<String, RedisCacheBo> createRedisTemplate(Class<T> tClass,
+                                                                              RedisPropsBo props) {
         Jackson2JsonRedisSerializer<T> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, tClass);
         GenericObjectPoolConfig<RedisStandaloneConfiguration> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setMaxIdle(props.maxIdle);
@@ -69,7 +69,7 @@ public abstract class StringRedisWrapperConfig {
         connectionFactory.setValidateConnection(true);
         connectionFactory.afterPropertiesSet();
 
-        RedisTemplate<String, T> redisTemplate = new RedisTemplate<>();
+        RedisTemplate<String, RedisCacheBo> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setValueSerializer(serializer);
         redisTemplate.setKeySerializer(new StringRedisSerializer());

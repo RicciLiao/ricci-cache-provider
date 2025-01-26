@@ -18,6 +18,11 @@ public class WrapperIdentifierBo implements Serializable {
     public WrapperIdentifierBo() {
     }
 
+    public static WrapperIdentifierBo i(String consumer, String identifier) {
+
+        return new WrapperIdentifierBo(consumer, identifier);
+    }
+
     private String consumer;
     private String identifier;
 

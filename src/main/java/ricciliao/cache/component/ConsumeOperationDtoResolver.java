@@ -66,7 +66,7 @@ public class ConsumeOperationDtoResolver implements HandlerMethodArgumentResolve
                                     )),
                             new TypeReference<>() {
                             });
-            Class<? extends RedisCacheBo> cacheClass = cacheProvider.getClass(new WrapperIdentifierBo(identifier.getC(), identifier.getI()));
+            Class<? extends RedisCacheBo> cacheClass = cacheProvider.getCacheClass(new WrapperIdentifierBo(identifier.getC(), identifier.getI()));
             JsonNode jsonNode = objectMapper.readTree(servletRequest.getReader().lines().collect(Collectors.joining()));
             JsonNode jsonDataNode = jsonNode.get(dataFieldOptional.get().getName());
             result = objectMapper.convertValue(jsonNode, new TypeReference<ConsumerOperationDto<RedisCacheBo>>() {

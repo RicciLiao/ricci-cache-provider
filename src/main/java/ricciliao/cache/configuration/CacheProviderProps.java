@@ -1,17 +1,16 @@
 package ricciliao.cache.configuration;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import ricciliao.cache.pojo.bo.WrapperIdentifierBo;
-import ricciliao.common.component.context.YamlPropertiesReader;
+import ricciliao.common.component.context.ApplicationProperties;
 
 import java.time.Duration;
 
 @Configuration
-public class ApplicationProperties {
+public class CacheProviderProps extends ApplicationProperties {
 
-    public ApplicationProperties() {
-        YamlPropertiesReader yamlProperties = new YamlPropertiesReader(new ClassPathResource("application.yml"));
+    public CacheProviderProps() {
+        super();
         this.timeZone = yamlProperties.getProperty("time-zone", String.class);
         this.redisHost = yamlProperties.getProperty("redis.host", String.class);
         this.redisPort = yamlProperties.getProperty("redis.port", Integer.class);

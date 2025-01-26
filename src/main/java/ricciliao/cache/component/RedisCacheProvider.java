@@ -3,8 +3,6 @@ package ricciliao.cache.component;
 import org.springframework.stereotype.Component;
 import ricciliao.cache.pojo.bo.WrapperIdentifierBo;
 import ricciliao.common.component.cache.RedisCacheBo;
-import ricciliao.common.component.exception.CmnException;
-import ricciliao.common.component.response.ResponseCodeEnum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,33 +10,33 @@ import java.util.Map;
 @Component
 public class RedisCacheProvider {
 
-    private final Map<WrapperIdentifierBo, StringRedisTemplateWrapper<? extends RedisCacheBo>> wrapperMap = new HashMap<>();
-    private final Map<WrapperIdentifierBo, Class<? extends RedisCacheBo>> classMap = new HashMap<>();
+    private final Map<WrapperIdentifierBo, StringRedisTemplateWrapper> providerMap = new HashMap<>();
+    private final Map<WrapperIdentifierBo, Class<? extends RedisCacheBo>> cacheClass = new HashMap<>();
 
-    public Map<WrapperIdentifierBo, StringRedisTemplateWrapper<? extends RedisCacheBo>> getWrapperMap() {
-        return wrapperMap;
+    public Map<WrapperIdentifierBo, StringRedisTemplateWrapper> getProviderMap() {
+        return providerMap;
     }
 
-    public Map<WrapperIdentifierBo, Class<? extends RedisCacheBo>> getClassMap() {
-        return classMap;
+    public Map<WrapperIdentifierBo, Class<? extends RedisCacheBo>> getCacheClass() {
+        return cacheClass;
     }
 
-    public StringRedisTemplateWrapper<? extends RedisCacheBo> getWrapper(WrapperIdentifierBo identifier) throws CmnException {
-        if (getWrapperMap().containsKey(identifier)) {
+    public StringRedisTemplateWrapper getProvider(WrapperIdentifierBo identifier) {
+        if (getProviderMap().containsKey(identifier)) {
 
-            return getWrapperMap().get(identifier);
+            return getProviderMap().get(identifier);
         }
 
-        throw new CmnException(ResponseCodeEnum.SYSTEM_ERROR);
+        return null;
     }
 
-    public Class<? extends RedisCacheBo> getClass(WrapperIdentifierBo identifier) throws CmnException {
-        if (getClassMap().containsKey(identifier)) {
+    public Class<? extends RedisCacheBo> getCacheClass(WrapperIdentifierBo identifier) {
+        if (getCacheClass().containsKey(identifier)) {
 
-            return getClassMap().get(identifier);
+            return getCacheClass().get(identifier);
         }
 
-        throw new CmnException(ResponseCodeEnum.SYSTEM_ERROR);
+        return RedisCacheBo.class;
     }
 
 }

@@ -13,13 +13,13 @@ public class BsmRedisConfig extends StringRedisWrapperConfig {
 
     public BsmRedisConfig(@Autowired RedisCacheProvider cacheProvider,
                           @Autowired ObjectMapper objectMapper,
-                          @Autowired ApplicationProperties applicationProperties) {
-        super(cacheProvider, objectMapper, applicationProperties);
+                          @Autowired CacheProviderProps cacheProviderProps) {
+        super(cacheProvider, objectMapper, cacheProviderProps);
     }
 
     @Override
     public void createWrappers() {
-        this.createWrapper(CaptchaRedisBo.class, applicationProperties.getCaptchaRedisProps());
-        this.createWrapper(EmailRedisBo.class, applicationProperties.getEmailRedisProps());
+        this.createWrapper(CaptchaRedisBo.class, cacheProviderProps.getCaptchaRedisProps());
+        this.createWrapper(EmailRedisBo.class, cacheProviderProps.getEmailRedisProps());
     }
 }
