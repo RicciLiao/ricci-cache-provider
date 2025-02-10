@@ -1,11 +1,12 @@
-package ricciliao.cache.configuration;
+package ricciliao.cache.configuration.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import ricciliao.cache.component.RedisCacheProvider;
-import ricciliao.cache.pojo.bo.CaptchaRedisBo;
-import ricciliao.cache.pojo.bo.EmailRedisBo;
+import ricciliao.cache.configuration.CacheProviderProps;
+import ricciliao.cache.pojo.dto.CaptchaRedisDto;
+import ricciliao.cache.pojo.dto.EmailRedisDto;
 
 @Configuration
 public class BsmRedisConfig extends StringRedisWrapperConfig {
@@ -19,7 +20,7 @@ public class BsmRedisConfig extends StringRedisWrapperConfig {
 
     @Override
     public void createWrappers() {
-        this.createWrapper(CaptchaRedisBo.class, cacheProviderProps.getCaptchaRedisProps());
-        this.createWrapper(EmailRedisBo.class, cacheProviderProps.getEmailRedisProps());
+        this.createWrapper(CaptchaRedisDto.class, cacheProviderProps.getCaptchaRedisProps());
+        this.createWrapper(EmailRedisDto.class, cacheProviderProps.getEmailRedisProps());
     }
 }

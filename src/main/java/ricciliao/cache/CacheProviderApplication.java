@@ -10,10 +10,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ricciliao.cache.component.ConsumeOperationDtoConverter;
-import ricciliao.cache.component.ConsumeOperationInterceptor;
+import ricciliao.cache.component.ConsumerIdentifierDtoResolver;
 import ricciliao.cache.component.RedisCacheProvider;
 
 import java.util.List;
@@ -50,12 +49,7 @@ public class CacheProviderApplication extends SpringBootServletInitializer imple
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        //resolvers.add(new ConsumeOperationDtoResolver(objectMapper, cacheProvider));
-    }
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new ConsumeOperationInterceptor());
+        resolvers.add(new ConsumerIdentifierDtoResolver());
     }
 
     public static void main(String[] args) {

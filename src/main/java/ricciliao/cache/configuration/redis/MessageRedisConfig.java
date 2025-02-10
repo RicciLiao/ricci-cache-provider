@@ -1,10 +1,11 @@
-package ricciliao.cache.configuration;
+package ricciliao.cache.configuration.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import ricciliao.cache.component.RedisCacheProvider;
-import ricciliao.cache.pojo.bo.MessageCodeBo;
+import ricciliao.cache.configuration.CacheProviderProps;
+import ricciliao.cache.pojo.dto.MessageCodeRedisDto;
 
 @Configuration
 public class MessageRedisConfig extends StringRedisWrapperConfig {
@@ -17,7 +18,7 @@ public class MessageRedisConfig extends StringRedisWrapperConfig {
 
     @Override
     public void createWrappers() {
-        this.createWrapper(MessageCodeBo.class, cacheProviderProps.getMessageRedisProps());
+        this.createWrapper(MessageCodeRedisDto.class, cacheProviderProps.getMessageRedisProps());
     }
 
 }

@@ -1,7 +1,8 @@
 package ricciliao.cache.configuration;
 
 import org.springframework.context.annotation.Configuration;
-import ricciliao.cache.pojo.bo.WrapperIdentifierBo;
+import ricciliao.cache.configuration.redis.StringRedisWrapperConfig;
+import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.common.component.context.ApplicationProperties;
 
 import java.time.Duration;
@@ -27,9 +28,9 @@ public class CacheProviderProps extends ApplicationProperties {
                         yamlProperties.getProperty("redis.db.bsm.captcha.pool.min-idle", Integer.class),
                         yamlProperties.getProperty("redis.db.bsm.captcha.pool.max-idle", Integer.class),
                         yamlProperties.getProperty("redis.db.bsm.captcha.pool.max-total", Integer.class),
-                        new WrapperIdentifierBo(
+                        new ConsumerIdentifierDto(
                                 yamlProperties.getProperty("redis.db.bsm.consumer", String.class),
-                                yamlProperties.getProperty("redis.db.bsm.captcha.identifier", String.class)
+                                yamlProperties.getProperty("redis.db.bsm.captcha.store", String.class)
                         )
                 );
         this.emailRedisProps =
@@ -43,9 +44,9 @@ public class CacheProviderProps extends ApplicationProperties {
                         yamlProperties.getProperty("redis.db.bsm.email.pool.min-idle", Integer.class),
                         yamlProperties.getProperty("redis.db.bsm.email.pool.max-idle", Integer.class),
                         yamlProperties.getProperty("redis.db.bsm.email.pool.max-total", Integer.class),
-                        new WrapperIdentifierBo(
+                        new ConsumerIdentifierDto(
                                 yamlProperties.getProperty("redis.db.bsm.consumer", String.class),
-                                yamlProperties.getProperty("redis.db.bsm.email.identifier", String.class)
+                                yamlProperties.getProperty("redis.db.bsm.email.store", String.class)
                         )
                 );
         this.messageRedisProps =
@@ -59,9 +60,9 @@ public class CacheProviderProps extends ApplicationProperties {
                         yamlProperties.getProperty("redis.db.message.code.pool.min-idle", Integer.class),
                         yamlProperties.getProperty("redis.db.message.code.pool.max-idle", Integer.class),
                         yamlProperties.getProperty("redis.db.message.code.pool.max-total", Integer.class),
-                        new WrapperIdentifierBo(
+                        new ConsumerIdentifierDto(
                                 yamlProperties.getProperty("redis.db.message.consumer", String.class),
-                                yamlProperties.getProperty("redis.db.message.code.identifier", String.class)
+                                yamlProperties.getProperty("redis.db.message.code.store", String.class)
                         )
                 );
     }

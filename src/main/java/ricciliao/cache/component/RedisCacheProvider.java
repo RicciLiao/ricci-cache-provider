@@ -1,8 +1,8 @@
 package ricciliao.cache.component;
 
 import org.springframework.stereotype.Component;
-import ricciliao.cache.pojo.bo.WrapperIdentifierBo;
-import ricciliao.common.component.cache.RedisCacheBo;
+import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.common.component.cache.pojo.RedisCacheDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,18 +10,18 @@ import java.util.Map;
 @Component
 public class RedisCacheProvider {
 
-    private final Map<WrapperIdentifierBo, StringRedisTemplateWrapper> providerMap = new HashMap<>();
-    private final Map<WrapperIdentifierBo, Class<? extends RedisCacheBo>> cacheClass = new HashMap<>();
+    private final Map<ConsumerIdentifierDto, StringRedisTemplateWrapper> providerMap = new HashMap<>();
+    private final Map<ConsumerIdentifierDto, Class<? extends RedisCacheDto>> cacheClass = new HashMap<>();
 
-    public Map<WrapperIdentifierBo, StringRedisTemplateWrapper> getProviderMap() {
+    public Map<ConsumerIdentifierDto, StringRedisTemplateWrapper> getProviderMap() {
         return providerMap;
     }
 
-    public Map<WrapperIdentifierBo, Class<? extends RedisCacheBo>> getCacheClass() {
+    public Map<ConsumerIdentifierDto, Class<? extends RedisCacheDto>> getCacheClass() {
         return cacheClass;
     }
 
-    public StringRedisTemplateWrapper getProvider(WrapperIdentifierBo identifier) {
+    public StringRedisTemplateWrapper getProvider(ConsumerIdentifierDto identifier) {
         if (getProviderMap().containsKey(identifier)) {
 
             return getProviderMap().get(identifier);
@@ -30,13 +30,13 @@ public class RedisCacheProvider {
         return null;
     }
 
-    public Class<? extends RedisCacheBo> getCacheClass(WrapperIdentifierBo identifier) {
+    public Class<? extends RedisCacheDto> getCacheClass(ConsumerIdentifierDto identifier) {
         if (getCacheClass().containsKey(identifier)) {
 
             return getCacheClass().get(identifier);
         }
 
-        return RedisCacheBo.class;
+        return null;
     }
 
 }

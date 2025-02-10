@@ -1,4 +1,4 @@
-package ricciliao.cache.configuration;
+package ricciliao.cache.configuration.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -10,8 +10,9 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import ricciliao.cache.component.RedisCacheProvider;
 import ricciliao.cache.component.StringRedisTemplateWrapper;
-import ricciliao.cache.pojo.bo.WrapperIdentifierBo;
-import ricciliao.common.component.cache.RedisCacheBo;
+import ricciliao.cache.configuration.CacheProviderProps;
+import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.common.component.cache.pojo.RedisCacheDto;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -34,8 +35,8 @@ public abstract class StringRedisWrapperConfig {
 
     public abstract void createWrappers();
 
-    public <T extends RedisCacheBo> void createWrapper(Class<T> tClass,
-                              RedisPropsBo props) {
+    public <T extends RedisCacheDto> void createWrapper(Class<T> tClass,
+                                                        RedisPropsBo props) {
         cacheProvider.getProviderMap().put(
                 props.identifier,
                 new StringRedisTemplateWrapper(
@@ -49,8 +50,8 @@ public abstract class StringRedisWrapperConfig {
         );
     }
 
-    private <T extends RedisCacheBo> RedisTemplate<String, RedisCacheBo> createRedisTemplate(Class<T> tClass,
-                                                                              RedisPropsBo props) {
+    private <T extends RedisCacheDto> RedisTemplate<String, RedisCacheDto> createRedisTemplate(Class<T> tClass,
+                                                                                               RedisPropsBo props) {
         Jackson2JsonRedisSerializer<T> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, tClass);
         GenericObjectPoolConfig<RedisStandaloneConfiguration> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setMaxIdle(props.maxIdle);
@@ -69,7 +70,7 @@ public abstract class StringRedisWrapperConfig {
         connectionFactory.setValidateConnection(true);
         connectionFactory.afterPropertiesSet();
 
-        RedisTemplate<String, RedisCacheBo> redisTemplate = new RedisTemplate<>();
+        RedisTemplate<String, RedisCacheDto> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setValueSerializer(serializer);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
@@ -88,7 +89,7 @@ public abstract class StringRedisWrapperConfig {
             int minIdle,
             int maxIdle,
             int maxTotal,
-            WrapperIdentifierBo identifier
+            ConsumerIdentifierDto identifier
     ) implements Serializable {
         @Serial
         private static final long serialVersionUID = 5585834914615699994L;

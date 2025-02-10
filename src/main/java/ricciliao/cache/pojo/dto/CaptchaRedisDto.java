@@ -1,12 +1,12 @@
-package ricciliao.cache.pojo.bo;
+package ricciliao.cache.pojo.dto;
 
-import ricciliao.common.component.cache.RedisCacheBo;
+import ricciliao.common.component.cache.pojo.RedisCacheDto;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class CaptchaRedisBo extends RedisCacheBo implements Serializable {
+public class CaptchaRedisDto extends RedisCacheDto implements Serializable {
     @Serial
     private static final long serialVersionUID = -5729432642565598935L;
 
@@ -32,7 +32,7 @@ public class CaptchaRedisBo extends RedisCacheBo implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CaptchaRedisBo that)) return false;
+        if (!(o instanceof CaptchaRedisDto that)) return false;
         if (!super.equals(o)) return false;
         return Objects.equals(getCaptcha(), that.getCaptcha()) && Objects.equals(getVerified(), that.getVerified());
     }

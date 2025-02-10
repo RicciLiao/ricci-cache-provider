@@ -16,7 +16,7 @@ redis:
     bsm:
       consumer: bsm
       captcha:
-        identifier: captcha
+        store: captcha
         database: 1
         timeout: 60000
         ttl: 300000
@@ -25,7 +25,7 @@ redis:
           max-idle: 5
           max-total: 20
       email:
-        identifier: email
+        store: email
         database: 2
         timeout: 60000
         ttl: 300000
@@ -36,7 +36,7 @@ redis:
     message:
       consumer: message
       code:
-        identifier: code
+        store: code
         database: 3
         timeout: 60000
         ttl: 300000

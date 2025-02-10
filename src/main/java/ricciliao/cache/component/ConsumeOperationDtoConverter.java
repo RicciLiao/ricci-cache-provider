@@ -2,6 +2,7 @@ package ricciliao.cache.component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -9,18 +10,22 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.NonNull;
-import ricciliao.cache.pojo.bo.WrapperIdentifierBo;
-import ricciliao.common.component.cache.ConsumerOperationData;
-import ricciliao.common.component.cache.ConsumerOperationDto;
-import ricciliao.common.component.cache.RedisCacheBo;
+import ricciliao.common.component.cache.Constants;
+import ricciliao.common.component.cache.ConsumerData;
+import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.common.component.cache.pojo.ConsumerOperationDto;
+import ricciliao.common.component.cache.pojo.RedisCacheDto;
+import ricciliao.common.component.exception.CmnParameterException;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
-public class ConsumeOperationDtoConverter extends AbstractHttpMessageConverter<ConsumerOperationDto<? extends RedisCacheBo>> {
+public class ConsumeOperationDtoConverter extends AbstractHttpMessageConverter<ConsumerOperationDto<? extends RedisCacheDto>> {
 
     private final ObjectMapper objectMapper;
     private final RedisCacheProvider cacheProvider;
@@ -39,36 +44,45 @@ public class ConsumeOperationDtoConverter extends AbstractHttpMessageConverter<C
 
     @NonNull
     @Override
-    protected ConsumerOperationDto<? extends RedisCacheBo> readInternal(@NonNull Class<? extends ConsumerOperationDto<? extends RedisCacheBo>> clazz,
-                                                                        @NonNull HttpInputMessage inputMessage) throws HttpMessageNotReadableException {
+    protected ConsumerOperationDto<? extends RedisCacheDto> readInternal(@NonNull Class<? extends ConsumerOperationDto<? extends RedisCacheDto>> clazz,
+                                                                         @NonNull HttpInputMessage inputMessage) throws HttpMessageNotReadableException {
 
-        Optional<Field> dataFieldOptional = Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.isAnnotationPresent(ConsumerOperationData.class)).findFirst();
+        Optional<Field> dataFieldOptional = Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.isAnnotationPresent(ConsumerData.class)).findFirst();
         if (dataFieldOptional.isEmpty()) {
 
-            throw new HttpMessageNotReadableException("missing @interface " + ConsumerOperationData.class.getSimpleName(), inputMessage);
+            throw new HttpMessageNotReadableException("missing @interface " + ConsumerData.class.getSimpleName(), inputMessage);
         }
         try {
+            List<String> customer = inputMessage.getHeaders().get(Constants.HTTP_HEADER_FOR_CACHE_CUSTOMER);
+            List<String> store = inputMessage.getHeaders().get(Constants.HTTP_HEADER_FOR_CACHE_STORE);
+            if (CollectionUtils.isEmpty(customer) || customer.size() > 1
+                    || CollectionUtils.isEmpty(store) || store.size() > 1) {
+
+                throw new CmnParameterException();
+            }
+            ConsumerIdentifierDto identifier = new ConsumerIdentifierDto(customer.get(0), store.get(0));
+            Class<? extends RedisCacheDto> cacheClass = cacheProvider.getCacheClass(identifier);
+            if (Objects.isNull(cacheClass)) {
+
+                throw new CmnParameterException();
+            }
+            Type type = objectMapper.getTypeFactory().constructParametricType(ConsumerOperationDto.class, cacheClass);
 
             return objectMapper.readValue(inputMessage.getBody(), new TypeReference<>() {
                 @Override
                 public Type getType() {
-                    WrapperIdentifierBo identifier =
-                            objectMapper.convertValue(inputMessage.getHeaders().toSingleValueMap(), new TypeReference<>() {
-                            }); // TODO cannot convert directly...
 
-                    return objectMapper.getTypeFactory().constructParametricType(
-                            ConsumerOperationDto.class, cacheProvider.getCacheClass(identifier)
-                    );
+                    return type;
                 }
             });
         } catch (Exception e) {
 
-            return null;
+            throw new HttpMessageNotReadableException("can not convert to " + ConsumerIdentifierDto.class, inputMessage);
         }
     }
 
     @Override
-    protected void writeInternal(@NonNull ConsumerOperationDto<? extends RedisCacheBo> consumerOperationDto,
+    protected void writeInternal(@NonNull ConsumerOperationDto<? extends RedisCacheDto> consumerOperationDto,
                                  @NonNull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         objectMapper.writeValue(outputMessage.getBody(), consumerOperationDto);
     }
