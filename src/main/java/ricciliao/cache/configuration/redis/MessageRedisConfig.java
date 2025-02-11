@@ -3,17 +3,17 @@ package ricciliao.cache.configuration.redis;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import ricciliao.cache.component.RedisCacheProvider;
 import ricciliao.cache.configuration.CacheProviderProps;
 import ricciliao.cache.pojo.dto.MessageCodeRedisDto;
+import ricciliao.common.component.cache.CacheProviderSelector;
 
 @Configuration
 public class MessageRedisConfig extends StringRedisWrapperConfig {
 
-    public MessageRedisConfig(@Autowired RedisCacheProvider cacheProvider,
+    public MessageRedisConfig(@Autowired CacheProviderSelector providerSelector,
                               @Autowired ObjectMapper objectMapper,
                               @Autowired CacheProviderProps cacheProviderProps) {
-        super(cacheProvider, objectMapper, cacheProviderProps);
+        super(providerSelector, objectMapper, cacheProviderProps);
     }
 
     @Override

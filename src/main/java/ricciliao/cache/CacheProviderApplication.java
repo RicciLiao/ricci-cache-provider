@@ -11,9 +11,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import ricciliao.cache.component.ConsumeOperationDtoConverter;
-import ricciliao.cache.component.ConsumerIdentifierDtoResolver;
-import ricciliao.cache.component.RedisCacheProvider;
+import ricciliao.common.component.cache.CacheProviderSelector;
+import ricciliao.common.component.cache.ConsumeOperationDtoConverter;
+import ricciliao.common.component.cache.ConsumerIdentifierDtoResolver;
 
 import java.util.List;
 
@@ -25,11 +25,11 @@ import java.util.List;
 public class CacheProviderApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
     private ObjectMapper objectMapper;
-    private RedisCacheProvider cacheProvider;
+    private CacheProviderSelector providerSelector;
 
     @Autowired
-    public void setCacheProvider(RedisCacheProvider cacheProvider) {
-        this.cacheProvider = cacheProvider;
+    public void setProviderSelector(CacheProviderSelector providerSelector) {
+        this.providerSelector = providerSelector;
     }
 
     @Autowired
@@ -44,7 +44,7 @@ public class CacheProviderApplication extends SpringBootServletInitializer imple
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(0, new ConsumeOperationDtoConverter(objectMapper, cacheProvider));
+        converters.add(0, new ConsumeOperationDtoConverter(objectMapper, providerSelector));
     }
 
     @Override

@@ -8,11 +8,11 @@ import org.springframework.data.redis.connection.lettuce.LettucePoolingClientCon
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import ricciliao.cache.component.RedisCacheProvider;
-import ricciliao.cache.component.StringRedisTemplateWrapper;
+import ricciliao.cache.component.StringRedisTemplateProvider;
 import ricciliao.cache.configuration.CacheProviderProps;
+import ricciliao.common.component.cache.CacheProviderSelector;
+import ricciliao.common.component.cache.pojo.CacheDto;
 import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.common.component.cache.pojo.RedisCacheDto;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -20,14 +20,14 @@ import java.time.Duration;
 
 public abstract class StringRedisWrapperConfig {
 
-    private final RedisCacheProvider cacheProvider;
+    private final CacheProviderSelector providerSelector;
     private final ObjectMapper objectMapper;
     protected final CacheProviderProps cacheProviderProps;
 
-    protected StringRedisWrapperConfig(RedisCacheProvider cacheProvider,
+    protected StringRedisWrapperConfig(CacheProviderSelector providerSelector,
                                     ObjectMapper objectMapper,
                                     CacheProviderProps applicationProperties) {
-        this.cacheProvider = cacheProvider;
+        this.providerSelector = providerSelector;
         this.objectMapper = objectMapper;
         this.cacheProviderProps = applicationProperties;
         this.createWrappers();
@@ -35,23 +35,23 @@ public abstract class StringRedisWrapperConfig {
 
     public abstract void createWrappers();
 
-    public <T extends RedisCacheDto> void createWrapper(Class<T> tClass,
-                                                        RedisPropsBo props) {
-        cacheProvider.getProviderMap().put(
+    public <T extends CacheDto> void createWrapper(Class<T> tClass,
+                                                   RedisPropsBo props) {
+        providerSelector.getCacheProviderMap().put(
                 props.identifier,
-                new StringRedisTemplateWrapper(
+                new StringRedisTemplateProvider(
                         createRedisTemplate(tClass, props),
                         props.ttl
                 )
         );
-        cacheProvider.getCacheClass().put(
+        providerSelector.getCacheClass().put(
                 props.identifier,
                 tClass
         );
     }
 
-    private <T extends RedisCacheDto> RedisTemplate<String, RedisCacheDto> createRedisTemplate(Class<T> tClass,
-                                                                                               RedisPropsBo props) {
+    private <T extends CacheDto> RedisTemplate<String, CacheDto> createRedisTemplate(Class<T> tClass,
+                                                                                     RedisPropsBo props) {
         Jackson2JsonRedisSerializer<T> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, tClass);
         GenericObjectPoolConfig<RedisStandaloneConfiguration> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setMaxIdle(props.maxIdle);
@@ -70,7 +70,7 @@ public abstract class StringRedisWrapperConfig {
         connectionFactory.setValidateConnection(true);
         connectionFactory.afterPropertiesSet();
 
-        RedisTemplate<String, RedisCacheDto> redisTemplate = new RedisTemplate<>();
+        RedisTemplate<String, CacheDto> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setValueSerializer(serializer);
         redisTemplate.setKeySerializer(new StringRedisSerializer());

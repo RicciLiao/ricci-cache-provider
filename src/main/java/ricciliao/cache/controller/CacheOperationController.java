@@ -14,7 +14,7 @@ import ricciliao.cache.annotation.ConsumerIdentifier;
 import ricciliao.cache.service.CacheService;
 import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.common.component.cache.pojo.ConsumerOperationDto;
-import ricciliao.common.component.cache.pojo.RedisCacheDto;
+import ricciliao.common.component.cache.pojo.CacheDto;
 import ricciliao.common.component.response.ResponseData;
 import ricciliao.common.component.response.ResponseSimpleData;
 import ricciliao.common.component.response.ResponseUtils;
@@ -34,7 +34,7 @@ public class CacheOperationController {
     @Operation(description = "Will create a new record for consumer.")
     @PostMapping("/operation")
     public ResponseVo<ResponseData> create(@ConsumerIdentifier ConsumerIdentifierDto identifier,
-                                           @RequestBody ConsumerOperationDto<RedisCacheDto> operation) {
+                                           @RequestBody ConsumerOperationDto<CacheDto> operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Bool(redisCacheService.create(identifier, operation)));
     }
@@ -42,7 +42,7 @@ public class CacheOperationController {
     @Operation(description = "Will update a existed record for consumer.")
     @PutMapping("/operation")
     public ResponseVo<ResponseData> update(@ConsumerIdentifier ConsumerIdentifierDto identifier,
-                                           @RequestBody ConsumerOperationDto<RedisCacheDto> operation) {
+                                           @RequestBody ConsumerOperationDto<CacheDto> operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Bool(redisCacheService.update(identifier, operation)));
     }

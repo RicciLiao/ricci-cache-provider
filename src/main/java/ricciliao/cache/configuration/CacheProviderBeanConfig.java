@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ricciliao.cache.aspect.ControllerAspect;
+import ricciliao.common.component.cache.CacheProviderSelector;
 import ricciliao.dynamic.aop.DynamicPointcutAdvisor;
 
 import java.util.TimeZone;
@@ -42,6 +43,12 @@ public class CacheProviderBeanConfig {
                 applicationProperties.getDynamicAopPointCutController(),
                 new ControllerAspect()
         );
+    }
+
+    @Bean
+    public CacheProviderSelector providerSelector(){
+
+        return new CacheProviderSelector();
     }
 
 }

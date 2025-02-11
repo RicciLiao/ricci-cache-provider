@@ -1,13 +1,13 @@
 package ricciliao.cache.pojo.dto;
 
-import ricciliao.common.component.cache.pojo.RedisCacheDto;
+import ricciliao.common.component.cache.pojo.CacheDto;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class EmailRedisDto extends RedisCacheDto implements Serializable {
+public class EmailRedisDto extends CacheDto implements Serializable {
     @Serial
     private static final long serialVersionUID = 8769005261320201830L;
 

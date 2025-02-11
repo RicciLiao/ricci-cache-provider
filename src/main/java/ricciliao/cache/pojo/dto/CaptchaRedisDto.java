@@ -1,12 +1,12 @@
 package ricciliao.cache.pojo.dto;
 
-import ricciliao.common.component.cache.pojo.RedisCacheDto;
+import ricciliao.common.component.cache.pojo.CacheDto;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class CaptchaRedisDto extends RedisCacheDto implements Serializable {
+public class CaptchaRedisDto extends CacheDto implements Serializable {
     @Serial
     private static final long serialVersionUID = -5729432642565598935L;
 
