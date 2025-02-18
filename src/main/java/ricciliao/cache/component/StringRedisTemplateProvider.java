@@ -2,9 +2,9 @@ package ricciliao.cache.component;
 
 
 import org.springframework.data.redis.core.RedisTemplate;
-import ricciliao.common.component.cache.CacheProvider;
-import ricciliao.common.component.cache.pojo.ConsumerOperationDto;
 import ricciliao.common.component.cache.pojo.CacheDto;
+import ricciliao.common.component.cache.pojo.ConsumerOperationDto;
+import ricciliao.common.component.cache.provider.CacheProvider;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -15,7 +15,7 @@ public class StringRedisTemplateProvider extends CacheProvider {
     private final RedisTemplate<String, CacheDto> redisTemplate;
 
     public StringRedisTemplateProvider(RedisTemplate<String, CacheDto> redisTemplate,
-                                          Duration ttl) {
+                                       Duration ttl) {
         super(ttl);
         this.redisTemplate = redisTemplate;
     }

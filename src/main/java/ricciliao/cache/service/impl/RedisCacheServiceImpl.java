@@ -3,7 +3,7 @@ package ricciliao.cache.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ricciliao.cache.service.CacheService;
-import ricciliao.common.component.cache.CacheProviderSelector;
+import ricciliao.common.component.cache.provider.CacheProviderSelector;
 import ricciliao.common.component.cache.pojo.CacheDto;
 import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.common.component.cache.pojo.ConsumerOperationDto;

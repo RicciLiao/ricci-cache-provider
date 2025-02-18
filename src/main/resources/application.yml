@@ -4,44 +4,54 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+logging:
+  level:
+    org.springframework.boot.autoconfigure: DEBUG
 time-zone: GMT+8
 dynamic-aop:
-  point-cut:
-    controller: execution(public ricciliao.common.component.response.ResponseVo ricciliao.cache.controller.*.*(..))
-redis:
-  host: 192.168.165.34
-  port: 6379
-  password: asl123456
-  db:
-    bsm:
-      consumer: bsm
-      captcha:
-        store: captcha
-        database: 1
-        timeout: 60000
-        ttl: 300000
-        pool:
-          min-idle: 2
-          max-idle: 5
-          max-total: 20
-      email:
-        store: email
-        database: 2
-        timeout: 60000
-        ttl: 300000
-        pool:
-          min-idle: 2
-          max-idle: 5
-          max-total: 20
-    message:
-      consumer: message
-      code:
-        store: code
-        database: 3
-        timeout: 60000
-        ttl: 300000
-        pool:
-          min-idle: 2
-          max-idle: 5
-          max-total: 20
-
+  aspect-list:
+    - bean-name: controllerAspect
+      expression: execution(public ricciliao.common.component.response.ResponseVo ricciliao.cache.controller.*.*(..))
+      aspect: ricciliao.cache.aspect.ControllerAspect
+cache-provider:
+  redis:
+    consumer-list:
+      - consumer: bsm
+        store-list:
+          - store: captcha
+            host: 192.168.165.34
+            port: 6379
+            password: asl123456
+            database: 1
+            store-class-name: ricciliao.cache.pojo.dto.CaptchaRedisDto
+            addition:
+              timeout: 60s
+              ttl: 300s
+              min-idle: 3
+              max-idle: 6
+              max-total: 20
+          - store: email
+            host: 192.168.165.34
+            port: 6379
+            password: asl123456
+            database: 2
+            store-class-name: ricciliao.cache.pojo.dto.EmailRedisDto
+            addition:
+              timeout: 50s
+              ttl: 400s
+              min-idle: 2
+              max-idle: 5
+              max-total: 20
+      - consumer: message
+        store-list:
+          - store: code
+            host: 192.168.165.34
+            port: 6379
+            password: asl123456
+            database: 3
+            store-class-name: ricciliao.cache.pojo.dto.MessageCodeRedisDto
+            addition:
+              timeout: 60s
+              ttl: 300s
+              min-idle: 2
+              max-idle: 5
