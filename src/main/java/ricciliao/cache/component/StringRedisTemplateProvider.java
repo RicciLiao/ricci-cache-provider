@@ -2,11 +2,11 @@ package ricciliao.cache.component;
 
 
 import org.springframework.data.redis.core.RedisTemplate;
-import ricciliao.common.component.cache.pojo.CacheDto;
-import ricciliao.common.component.cache.pojo.ConsumerOperationDto;
-import ricciliao.common.component.cache.provider.CacheProvider;
+import ricciliao.x.component.cache.pojo.CacheDto;
+import ricciliao.x.component.cache.pojo.ConsumerOperationDto;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -51,6 +51,11 @@ public class StringRedisTemplateProvider extends CacheProvider {
     public boolean delete(String key) {
 
         return Boolean.TRUE.equals(redisTemplate.delete(key));
+    }
+
+    @Override
+    public List<ConsumerOperationDto<CacheDto>> list() {
+        return null;
     }
 
 }

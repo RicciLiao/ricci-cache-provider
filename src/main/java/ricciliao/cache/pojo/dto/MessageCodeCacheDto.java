@@ -1,11 +1,12 @@
 package ricciliao.cache.pojo.dto;
 
-import ricciliao.common.component.cache.pojo.CacheDto;
+
+import ricciliao.x.component.cache.pojo.CacheDto;
 
 import java.io.Serial;
 import java.util.Objects;
 
-public class MessageCodeRedisDto extends CacheDto {
+public class MessageCodeCacheDto extends CacheDto {
     @Serial
     private static final long serialVersionUID = -4046549743760144498L;
     private Long code;
@@ -57,7 +58,7 @@ public class MessageCodeRedisDto extends CacheDto {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MessageCodeRedisDto that)) return false;
+        if (!(o instanceof MessageCodeCacheDto that)) return false;
         return Objects.equals(getCacheId(), that.getCacheId()) && Objects.equals(getCode(), that.getCode()) && Objects.equals(getType(), that.getType()) && Objects.equals(getProjectCode(), that.getProjectCode()) && Objects.equals(getDescription(), that.getDescription()) && Objects.equals(getActive(), that.getActive());
     }
 

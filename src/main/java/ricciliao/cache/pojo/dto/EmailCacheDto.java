@@ -1,13 +1,14 @@
 package ricciliao.cache.pojo.dto;
 
-import ricciliao.common.component.cache.pojo.CacheDto;
+
+import ricciliao.x.component.cache.pojo.CacheDto;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class EmailRedisDto extends CacheDto implements Serializable {
+public class EmailCacheDto extends CacheDto implements Serializable {
     @Serial
     private static final long serialVersionUID = 8769005261320201830L;
 
@@ -60,7 +61,7 @@ public class EmailRedisDto extends CacheDto implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof EmailRedisDto that)) return false;
+        if (!(o instanceof EmailCacheDto that)) return false;
         if (!super.equals(o)) return false;
         return isSent() == that.isSent() && Objects.equals(getFrom(), that.getFrom()) && Objects.equals(getTo(), that.getTo()) && Objects.equals(getTypeCd(), that.getTypeCd()) && Objects.equals(getCreatedDtm(), that.getCreatedDtm()) && Objects.equals(getSentDtm(), that.getSentDtm());
     }

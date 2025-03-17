@@ -18,8 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import ricciliao.common.component.cache.CacheConstants;
-import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.component.cache.CacheConstants;
+import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
 
 import java.util.Objects;
 

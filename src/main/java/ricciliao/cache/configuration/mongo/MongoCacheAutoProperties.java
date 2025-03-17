@@ -1,14 +1,15 @@
-package ricciliao.cache.configuration.redis;
+package ricciliao.cache.configuration.mongo;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import ricciliao.common.component.cache.pojo.CacheDto;
+import ricciliao.x.component.cache.pojo.CacheDto;
+import ricciliao.x.component.props.ApplicationProperties;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-@ConfigurationProperties("cache-provider.redis")
-public class RedisCacheProperties {
+@ConfigurationProperties("cache-provider.mongo")
+public class MongoCacheAutoProperties extends ApplicationProperties {
 
     private List<ConsumerProperties> consumerList = new ArrayList<>();
 
@@ -47,9 +48,18 @@ public class RedisCacheProperties {
             private String host;
             private Integer port;
             private String password;
-            private Integer database = 0;
+            private String database;
+            private String authDatabase = "admin";
             private Class<? extends CacheDto> storeClassName;
             private AdditionalProperties addition = new AdditionalProperties();
+
+            public String getAuthDatabase() {
+                return authDatabase;
+            }
+
+            public void setAuthDatabase(String authDatabase) {
+                this.authDatabase = authDatabase;
+            }
 
             public String getStore() {
                 return store;
@@ -83,11 +93,11 @@ public class RedisCacheProperties {
                 this.password = password;
             }
 
-            public Integer getDatabase() {
+            public String getDatabase() {
                 return database;
             }
 
-            public void setDatabase(Integer database) {
+            public void setDatabase(String database) {
                 this.database = database;
             }
 
@@ -110,10 +120,7 @@ public class RedisCacheProperties {
             public static class AdditionalProperties {
 
                 private Duration timeout = Duration.ofSeconds(30);
-                private Duration ttl = Duration.ofSeconds(10);
-                private Integer minIdle = 2;
-                private Integer maxIdle = 5;
-                private Integer maxTotal = 20;
+                private Duration ttl = Duration.ofSeconds(60);
 
                 public Duration getTimeout() {
                     return timeout;
@@ -129,30 +136,6 @@ public class RedisCacheProperties {
 
                 public void setTtl(Duration ttl) {
                     this.ttl = ttl;
-                }
-
-                public Integer getMinIdle() {
-                    return minIdle;
-                }
-
-                public void setMinIdle(Integer minIdle) {
-                    this.minIdle = minIdle;
-                }
-
-                public Integer getMaxIdle() {
-                    return maxIdle;
-                }
-
-                public void setMaxIdle(Integer maxIdle) {
-                    this.maxIdle = maxIdle;
-                }
-
-                public Integer getMaxTotal() {
-                    return maxTotal;
-                }
-
-                public void setMaxTotal(Integer maxTotal) {
-                    this.maxTotal = maxTotal;
                 }
             }
         }

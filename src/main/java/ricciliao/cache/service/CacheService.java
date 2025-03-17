@@ -1,8 +1,11 @@
 package ricciliao.cache.service;
 
-import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.common.component.cache.pojo.ConsumerOperationDto;
-import ricciliao.common.component.cache.pojo.CacheDto;
+import ricciliao.x.component.cache.pojo.CacheDto;
+import ricciliao.x.component.cache.pojo.CacheExtraOperationDto;
+import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.component.cache.pojo.ConsumerOperationDto;
+
+import java.util.List;
 
 public interface CacheService {
 
@@ -15,5 +18,7 @@ public interface CacheService {
     boolean delete(ConsumerIdentifierDto identifier, String id);
 
     ConsumerOperationDto<CacheDto> get(ConsumerIdentifierDto identifier, String id);
+
+    List<ConsumerOperationDto<CacheDto>> list(ConsumerIdentifierDto identifier, CacheExtraOperationDto operation);
 
 }

@@ -4,54 +4,36 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-logging:
-  level:
-    org.springframework.boot.autoconfigure: DEBUG
-time-zone: GMT+8
-dynamic-aop:
-  aspect-list:
-    - bean-name: controllerAspect
-      expression: execution(public ricciliao.common.component.response.ResponseVo ricciliao.cache.controller.*.*(..))
-      aspect: ricciliao.cache.aspect.ControllerAspect
+
 cache-provider:
-  redis:
+  mongo:
     consumer-list:
       - consumer: bsm
         store-list:
           - store: captcha
             host: 192.168.165.34
-            port: 6379
+            port: 27017
             password: asl123456
-            database: 1
-            store-class-name: ricciliao.cache.pojo.dto.CaptchaRedisDto
+            database: captcha
+            store-class-name: ricciliao.cache.pojo.dto.CaptchaCacheDto
             addition:
               timeout: 60s
-              ttl: 300s
-              min-idle: 3
-              max-idle: 6
-              max-total: 20
+              ttl: 20s
           - store: email
             host: 192.168.165.34
-            port: 6379
+            port: 27017
             password: asl123456
-            database: 2
-            store-class-name: ricciliao.cache.pojo.dto.EmailRedisDto
+            database: email
+            store-class-name: ricciliao.cache.pojo.dto.EmailCacheDto
             addition:
               timeout: 50s
-              ttl: 400s
-              min-idle: 2
-              max-idle: 5
-              max-total: 20
-      - consumer: message
-        store-list:
-          - store: code
-            host: 192.168.165.34
-            port: 6379
-            password: asl123456
-            database: 3
-            store-class-name: ricciliao.cache.pojo.dto.MessageCodeRedisDto
-            addition:
-              timeout: 60s
-              ttl: 300s
-              min-idle: 2
-              max-idle: 5
+              ttl: 20s
+ricciliao:
+  x:
+    dynamic-aspect:
+      aspect-list:
+        - bean-name: controllerAspect
+          expression: execution(public ricciliao.common.component.response.ResponseVo ricciliao.cache.controller.*.*(..))
+          aspect: ricciliao.cache.aspect.ControllerAspect
+    common:
+      time-zone: GMT+8

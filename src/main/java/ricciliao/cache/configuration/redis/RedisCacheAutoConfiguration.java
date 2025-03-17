@@ -3,37 +3,29 @@ package ricciliao.cache.configuration.redis;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.lang.NonNull;
+import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.component.StringRedisTemplateProvider;
-import ricciliao.common.component.cache.pojo.CacheDto;
-import ricciliao.common.component.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.common.component.cache.provider.CacheProviderSelector;
+import ricciliao.x.component.cache.pojo.CacheDto;
+import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.starter.PropsAutoConfiguration;
 
-import java.util.Objects;
-
-
-@AutoConfiguration
-@Conditional(RedisCacheAutoConfiguration.ConfigurationCondition.class)
-@EnableConfigurationProperties({RedisCacheProperties.class})
+@PropsAutoConfiguration(
+        properties = RedisCacheAutoProperties.class,
+        conditionProperties = "cache-provider.redis.consumer-list[0].consumer"
+)
 public class RedisCacheAutoConfiguration {
 
     public RedisCacheAutoConfiguration(@Autowired ObjectMapper objectMapper,
-                                       @Autowired RedisCacheProperties props,
+                                       @Autowired RedisCacheAutoProperties props,
                                        @Autowired CacheProviderSelector providerSelector) {
-        for (RedisCacheProperties.ConsumerProperties consumerProps : props.getConsumerList()) {
-            for (RedisCacheProperties.ConsumerProperties.StoreProperties storeProps : consumerProps.getStoreList()) {
+        for (RedisCacheAutoProperties.ConsumerProperties consumerProps : props.getConsumerList()) {
+            for (RedisCacheAutoProperties.ConsumerProperties.StoreProperties storeProps : consumerProps.getStoreList()) {
                 this.createWrapper(
                         new ConsumerIdentifierDto(consumerProps.getConsumer(), storeProps.getStore()),
                         objectMapper,
@@ -46,7 +38,7 @@ public class RedisCacheAutoConfiguration {
 
     public void createWrapper(ConsumerIdentifierDto identifier,
                               ObjectMapper objectMapper,
-                              RedisCacheProperties.ConsumerProperties.StoreProperties props,
+                              RedisCacheAutoProperties.ConsumerProperties.StoreProperties props,
                               CacheProviderSelector providerSelector) {
         providerSelector.getCacheProviderMap().put(
                 identifier,
@@ -56,7 +48,7 @@ public class RedisCacheAutoConfiguration {
     }
 
     private RedisTemplate<String, CacheDto> createRedisTemplate(ObjectMapper objectMapper,
-                                                                RedisCacheProperties.ConsumerProperties.StoreProperties props) {
+                                                                RedisCacheAutoProperties.ConsumerProperties.StoreProperties props) {
         Jackson2JsonRedisSerializer<? extends CacheDto> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, props.getStoreClassName());
         GenericObjectPoolConfig<RedisStandaloneConfiguration> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setMaxIdle(props.getAddition().getMaxIdle());
@@ -82,16 +74,6 @@ public class RedisCacheAutoConfiguration {
         redisTemplate.afterPropertiesSet();
 
         return redisTemplate;
-    }
-
-    static class ConfigurationCondition implements Condition {
-
-        @Override
-        public boolean matches(ConditionContext context, @NonNull AnnotatedTypeMetadata metadata) {
-
-            return Objects.nonNull(context.getEnvironment().getProperty("cache-provider.redis.consumer-list[0].consumer"));
-        }
-
     }
 
 }
