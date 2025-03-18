@@ -15,11 +15,7 @@
     <description>Brain Storming project for Spring Boot</description>
 
     <properties>
-        <java.version>21</java.version>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
     </properties>
 
     <dependencies>
@@ -47,10 +43,6 @@
         <dependency>
             <groupId>ricciliao.x</groupId>
             <artifactId>components-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ricciliao</groupId>
-            <artifactId>dynamic-aop</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
