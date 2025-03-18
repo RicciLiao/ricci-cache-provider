@@ -30,10 +30,5 @@ cache-provider:
               ttl: 20s
 ricciliao:
   x:
-    dynamic-aspect:
-      aspect-list:
-        - bean-name: controllerAspect
-          expression: execution(public ricciliao.common.component.response.ResponseVo ricciliao.cache.controller.*.*(..))
-          aspect: ricciliao.cache.aspect.ControllerAspect
     common:
       time-zone: GMT+8

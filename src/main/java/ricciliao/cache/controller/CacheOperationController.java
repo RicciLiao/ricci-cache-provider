@@ -39,7 +39,7 @@ public class CacheOperationController {
     public ResponseVo<ResponseData> create(@ConsumerIdentifier ConsumerIdentifierDto identifier,
                                            @RequestBody ConsumerOperationDto<CacheDto> operation) {
 
-        return ResponseUtils.successResponse(new ResponseSimpleData.Bool(redisCacheService.create(identifier, operation)));
+        return ResponseUtils.successResponse(new ResponseSimpleData.Str(redisCacheService.create(identifier, operation)));
     }
 
     @Operation(description = "Update a existed record for consumer.")

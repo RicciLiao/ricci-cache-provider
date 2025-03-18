@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface CacheService {
 
-    boolean create(ConsumerIdentifierDto identifier,
-                   ConsumerOperationDto<CacheDto> operation);
+    String create(ConsumerIdentifierDto identifier,
+                  ConsumerOperationDto<CacheDto> operation);
 
     boolean update(ConsumerIdentifierDto identifier,
                    ConsumerOperationDto<CacheDto> operation);

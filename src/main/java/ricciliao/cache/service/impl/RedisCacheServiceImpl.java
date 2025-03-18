@@ -26,13 +26,14 @@ public class RedisCacheServiceImpl implements CacheService {
     }
 
     @Override
-    public boolean create(ConsumerIdentifierDto identifier, ConsumerOperationDto<CacheDto> operation) {
+    public String create(ConsumerIdentifierDto identifier, ConsumerOperationDto<CacheDto> operation) {
         operation.getData().setCacheId(RandomGenerator.nextString(12).allAtLeast(3).generate());
         operation.getData().setCreatedDtm(LocalDateTime.now());
         operation.getData().setUpdatedDtm(operation.getData().getCreatedDtm());
         operation.getData().setEffectedDtm(operation.getData().getCreatedDtm());
+        providerSelector.selectProvider(identifier).create(operation);
 
-        return providerSelector.selectProvider(identifier).create(operation);
+        return operation.getData().getCacheId();
     }
 
     @Override
