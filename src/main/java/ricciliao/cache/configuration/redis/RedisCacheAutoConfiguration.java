@@ -12,6 +12,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.component.StringRedisTemplateProvider;
 import ricciliao.x.component.cache.pojo.CacheDto;
+import ricciliao.x.component.cache.pojo.ProviderInfoDto;
 import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.starter.PropsAutoConfiguration;
 
@@ -42,14 +43,30 @@ public class RedisCacheAutoConfiguration {
                               CacheProviderSelector providerSelector) {
         providerSelector.getCacheProviderMap().put(
                 identifier,
-                new StringRedisTemplateProvider(createRedisTemplate(objectMapper, props), props.getAddition().getTtl())
+                new StringRedisTemplateProvider(
+                        identifier,
+                        props,
+                        redisTemplate(objectMapper, props)
+                )
         );
         providerSelector.getCacheClass().put(identifier, props.getStoreClassName());
     }
 
-    private RedisTemplate<String, CacheDto> createRedisTemplate(ObjectMapper objectMapper,
-                                                                RedisCacheAutoProperties.ConsumerProperties.StoreProperties props) {
+    private RedisTemplate<String, CacheDto> redisTemplate(ObjectMapper objectMapper,
+                                                          RedisCacheAutoProperties.ConsumerProperties.StoreProperties props) {
         Jackson2JsonRedisSerializer<? extends CacheDto> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, props.getStoreClassName());
+
+        RedisTemplate<String, CacheDto> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(lettuceConnectionFactory(props, false));
+        redisTemplate.setValueSerializer(serializer);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.afterPropertiesSet();
+
+        return redisTemplate;
+    }
+
+    private LettuceConnectionFactory lettuceConnectionFactory(RedisCacheAutoProperties.ConsumerProperties.StoreProperties props, boolean info) {
+
         GenericObjectPoolConfig<RedisStandaloneConfiguration> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setMaxIdle(props.getAddition().getMaxIdle());
         poolConfig.setMaxTotal(props.getAddition().getMaxTotal());
@@ -57,7 +74,7 @@ public class RedisCacheAutoConfiguration {
         poolConfig.setMaxWait(props.getAddition().getTimeout());
 
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(props.getHost(), props.getPort());
-        configuration.setDatabase(props.getDatabase());
+        configuration.setDatabase(info ? 0 : props.getDatabase());
         configuration.setPassword(props.getPassword());
 
         LettucePoolingClientConfiguration.LettucePoolingClientConfigurationBuilder builder = LettucePoolingClientConfiguration.builder();
@@ -67,13 +84,7 @@ public class RedisCacheAutoConfiguration {
         connectionFactory.setValidateConnection(true);
         connectionFactory.afterPropertiesSet();
 
-        RedisTemplate<String, CacheDto> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(connectionFactory);
-        redisTemplate.setValueSerializer(serializer);
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.afterPropertiesSet();
-
-        return redisTemplate;
+        return connectionFactory;
     }
 
 }

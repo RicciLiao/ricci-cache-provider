@@ -1,13 +1,16 @@
 package ricciliao.cache.component;
 
 import com.mongodb.client.result.UpdateResult;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import ricciliao.cache.configuration.mongo.MongoCacheAutoProperties;
 import ricciliao.x.component.cache.pojo.CacheDto;
+import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.component.cache.pojo.ConsumerOperationDto;
+import ricciliao.x.component.cache.pojo.ProviderInfoDto;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,14 +20,14 @@ public class MongoTemplateProvider extends CacheProvider {
     private final String collectionName;
     private final Class<? extends CacheDto> storeClassName;
 
-    public MongoTemplateProvider(MongoTemplate mongoTemplate,
-                                 Duration ttl,
-                                 String collectionName,
-                                 Class<? extends CacheDto> storeClassName) {
-        super(ttl);
+    public MongoTemplateProvider(ConsumerIdentifierDto identifier,
+                                 MongoCacheAutoProperties.ConsumerProperties.StoreProperties props,
+                                 MongoTemplate mongoTemplate) {
+
+        super(identifier, props.getAddition().getTtl());
         this.mongoTemplate = mongoTemplate;
-        this.collectionName = collectionName;
-        this.storeClassName = storeClassName;
+        this.collectionName = props.getStore();
+        this.storeClassName = props.getStoreClassName();
     }
 
     @Override
@@ -55,7 +58,7 @@ public class MongoTemplateProvider extends CacheProvider {
                 );
         if (Objects.nonNull(cache)) {
 
-            return new ConsumerOperationDto<>(key, this.getTtl().toMillis(), cache);
+            return new ConsumerOperationDto<>(cache, this.getTtl().toMillis());
         }
 
         return null;
@@ -77,4 +80,23 @@ public class MongoTemplateProvider extends CacheProvider {
     public List<ConsumerOperationDto<CacheDto>> list() {
         return null;
     }
+
+    @Override
+    public ProviderInfoDto getProviderInfo() {
+        CacheDto maxUpdatedDtm =
+                mongoTemplate.findOne(
+                        new Query().with(Sort.by(Sort.Order.desc("updatedDtm"))).limit(1),
+                        storeClassName,
+                        collectionName
+                );
+        ProviderInfoDto result = new ProviderInfoDto(this.getConsumerIdentifier());
+
+        if (Objects.nonNull(maxUpdatedDtm)) {
+            result.setMaxUpdatedDtm(maxUpdatedDtm.getUpdatedDtm());
+            result.setCount(mongoTemplate.count(new Query(), collectionName));
+        }
+
+        return result;
+    }
+
 }

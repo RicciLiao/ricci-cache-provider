@@ -6,6 +6,24 @@ spring:
       matching-strategy: ant_path_matcher
 
 cache-provider:
+  redis:
+    consumer-list:
+      - consumer: message
+        store-list:
+          - store: code
+            host: 192.168.165.34
+            port: 6379
+            password: asl123456
+            database: 1
+            store-class-name: ricciliao.cache.pojo.dto.MessageCodeCacheDto
+            addition:
+              max-idle: 20
+              max-total: 40
+              min-idle: 10
+              timeout:
+                seconds: 60
+              ttl:
+                seconds: -1
   mongo:
     consumer-list:
       - consumer: bsm
@@ -17,8 +35,7 @@ cache-provider:
             database: captcha
             store-class-name: ricciliao.cache.pojo.dto.CaptchaCacheDto
             addition:
-              timeout: 60s
-              ttl: 20s
+              ttl: 60s
           - store: email
             host: 192.168.165.34
             port: 27017
@@ -26,8 +43,7 @@ cache-provider:
             database: email
             store-class-name: ricciliao.cache.pojo.dto.EmailCacheDto
             addition:
-              timeout: 50s
-              ttl: 20s
+              timeout: 60s
 ricciliao:
   x:
     common:

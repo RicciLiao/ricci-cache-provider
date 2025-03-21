@@ -41,7 +41,6 @@ public class MongoCacheAutoConfiguration {
             for (MongoCacheAutoProperties.ConsumerProperties.StoreProperties storeProps : consumerProps.getStoreList()) {
                 this.createWrapper(
                         new ConsumerIdentifierDto(consumerProps.getConsumer(), storeProps.getStore()),
-                        consumerProps.getConsumer(),
                         storeProps,
                         providerSelector
                 );
@@ -50,16 +49,11 @@ public class MongoCacheAutoConfiguration {
     }
 
     private void createWrapper(ConsumerIdentifierDto identifier,
-                               String consumer,
                                MongoCacheAutoProperties.ConsumerProperties.StoreProperties props,
                                CacheProviderSelector providerSelector) {
         providerSelector.getCacheProviderMap().put(
                 identifier,
-                new MongoTemplateProvider(
-                        createMongoTemplate(consumer, props),
-                        props.getAddition().getTtl(),
-                        props.getStore(),
-                        props.getStoreClassName()
+                new MongoTemplateProvider(identifier, props, createMongoTemplate(identifier.getConsumer(), props)
                 )
         );
         providerSelector.getCacheClass().put(identifier, props.getStoreClassName());

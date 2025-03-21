@@ -22,19 +22,27 @@ import ricciliao.x.component.response.ResponseVo;
 @RequestMapping("/operation/extra")
 public class CacheExtraOperationController {
 
-    private CacheService redisCacheService;
+    private CacheService cacheService;
 
     @Autowired
-    public void setRedisCacheService(CacheService redisCacheService) {
-        this.redisCacheService = redisCacheService;
+    public void setCacheService(CacheService cacheService) {
+        this.cacheService = cacheService;
     }
 
-    @Operation(description = "Retrieve list of existed record for consumer.")
+    @Operation(description = "Retrieve list of existed record for the consumer(with identifier).")
     @GetMapping("/list")
     public ResponseVo<ResponseData> list(@ConsumerIdentifier ConsumerIdentifierDto identifier,
                                          @ModelAttribute CacheExtraOperationDto operation) {
 
-        return ResponseUtils.successResponse(ResponseCollectionData.data(redisCacheService.list(identifier, operation)));
+        return ResponseUtils.successResponse(ResponseCollectionData.data(cacheService.list(identifier, operation)));
+    }
+
+
+    @Operation(description = "Retrieve provider information for the consumer(with identifier).")
+    @GetMapping("/providerInfo")
+    public ResponseVo<ResponseData> getProviderInfo(@ConsumerIdentifier ConsumerIdentifierDto identifier) {
+
+        return ResponseUtils.successResponse(cacheService.getProviderInfo(identifier));
     }
 
 }

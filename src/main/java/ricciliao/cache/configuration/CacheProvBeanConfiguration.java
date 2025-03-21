@@ -19,7 +19,6 @@ import java.util.List;
 
 @Configuration
 @ImportAutoConfiguration({MongoCacheAutoConfiguration.class})
-/*@ComponentScan(basePackages = {"ricciliao.x"})*/
 public class CacheProvBeanConfiguration implements WebMvcConfigurer {
 
     private ObjectMapper objectMapper;
