@@ -1,7 +1,7 @@
 package ricciliao.cache.configuration.mongo;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import ricciliao.x.component.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.CacheDto;
 import ricciliao.x.component.props.ApplicationProperties;
 
 import java.time.Duration;

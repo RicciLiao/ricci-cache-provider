@@ -12,11 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ricciliao.cache.service.CacheService;
-import ricciliao.x.component.cache.consumer.ConsumerIdentifier;
-import ricciliao.x.component.cache.pojo.CacheDto;
-import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.x.component.cache.pojo.ConsumerOperationBatchDto;
-import ricciliao.x.component.cache.pojo.ConsumerOperationDto;
+import ricciliao.x.cache.ConsumerIdentifier;
+import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.component.response.ResponseData;
 import ricciliao.x.component.response.ResponseSimpleData;
 import ricciliao.x.component.response.ResponseUtils;
@@ -37,7 +36,7 @@ public class CacheOperationController {
     @Operation(description = "Create a new record for the consumer(with identifier).")
     @PostMapping("")
     public ResponseVo<ResponseData> create(@ConsumerIdentifier ConsumerIdentifierDto identifier,
-                                           @RequestBody ConsumerOperationDto<CacheDto> operation) {
+                                           @RequestBody ConsumerOpDto.Single<CacheDto> operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Str(cacheService.create(identifier, operation)));
     }
@@ -45,7 +44,7 @@ public class CacheOperationController {
     @Operation(description = "Update a existed record for the consumer(with identifier).")
     @PutMapping("")
     public ResponseVo<ResponseData> update(@ConsumerIdentifier ConsumerIdentifierDto identifier,
-                                           @RequestBody ConsumerOperationDto<CacheDto> operation) {
+                                           @RequestBody ConsumerOpDto.Single<CacheDto> operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Bool(cacheService.update(identifier, operation)));
     }
@@ -68,9 +67,9 @@ public class CacheOperationController {
 
 
     @Operation(description = "Batch create new records for the consumer(with identifier).")
-    @PostMapping("/")
+    @PostMapping("/batch")
     public ResponseVo<ResponseData> create(@ConsumerIdentifier ConsumerIdentifierDto identifier,
-                                           @RequestBody ConsumerOperationBatchDto<CacheDto> operation) {
+                                           @RequestBody ConsumerOpDto.Batch<CacheDto> operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Bool(cacheService.create(identifier, operation)));
     }

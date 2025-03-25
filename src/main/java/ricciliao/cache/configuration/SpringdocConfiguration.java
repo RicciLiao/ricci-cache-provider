@@ -18,8 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import ricciliao.x.component.cache.CacheConstants;
-import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.XCacheConstants;
+import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 
 import java.util.Objects;
 
@@ -64,12 +64,12 @@ public class SpringdocConfiguration {
     public OpenApiCustomizer openApiCustomizer() {
         Parameter customer =
                 new HeaderParameter()
-                        .name(CacheConstants.HTTP_HEADER_FOR_CACHE_CUSTOMER)
+                        .name(XCacheConstants.HTTP_HEADER_FOR_CACHE_CUSTOMER)
                         .description("the customer of cache")
                         .required(true);
         Parameter store =
                 new HeaderParameter()
-                        .name(CacheConstants.HTTP_HEADER_FOR_CACHE_STORE)
+                        .name(XCacheConstants.HTTP_HEADER_FOR_CACHE_STORE)
                         .description("the customer store of cache")
                         .required(true);
 

@@ -9,10 +9,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ricciliao.cache.service.CacheService;
-import ricciliao.x.component.cache.consumer.ConsumerIdentifier;
-import ricciliao.x.component.cache.pojo.CacheExtraOperationDto;
-import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.x.component.response.ResponseCollectionData;
+import ricciliao.x.cache.ConsumerIdentifier;
+import ricciliao.x.cache.pojo.CacheExtraOperationDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.component.response.ResponseData;
 import ricciliao.x.component.response.ResponseUtils;
 import ricciliao.x.component.response.ResponseVo;
@@ -34,15 +33,15 @@ public class CacheExtraOperationController {
     public ResponseVo<ResponseData> list(@ConsumerIdentifier ConsumerIdentifierDto identifier,
                                          @ModelAttribute CacheExtraOperationDto operation) {
 
-        return ResponseUtils.successResponse(ResponseCollectionData.data(cacheService.list(identifier, operation)));
+        return ResponseUtils.successResponse(cacheService.list(identifier, operation));
     }
 
 
     @Operation(description = "Retrieve provider information for the consumer(with identifier).")
     @GetMapping("/providerInfo")
-    public ResponseVo<ResponseData> getProviderInfo(@ConsumerIdentifier ConsumerIdentifierDto identifier) {
+    public ResponseVo<ResponseData> providerInfo(@ConsumerIdentifier ConsumerIdentifierDto identifier) {
 
-        return ResponseUtils.successResponse(cacheService.getProviderInfo(identifier));
+        return ResponseUtils.successResponse(cacheService.providerInfo(identifier));
     }
 
 }

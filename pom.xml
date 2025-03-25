@@ -12,10 +12,10 @@
     <version>1.0.0</version>
     <packaging>war</packaging>
     <name>ricci-cache-provider</name>
-    <description>Brain Storming project for Spring Boot</description>
+    <description>Cache Provider Interface Service</description>
 
     <properties>
-
+        <assembly-pojo-jar.finalName>cache-provider-components-${project.version}</assembly-pojo-jar.finalName>
     </properties>
 
     <dependencies>
@@ -47,6 +47,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ricciliao.x</groupId>
+            <artifactId>cache-xprovider</artifactId>
         </dependency>
 
         <dependency>

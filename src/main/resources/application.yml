@@ -15,15 +15,14 @@ cache-provider:
             port: 6379
             password: asl123456
             database: 1
-            store-class-name: ricciliao.cache.pojo.dto.MessageCodeCacheDto
+            store-class-name: ricciliao.x.cache.pojo.message.MessageCodeCacheDto
             addition:
               max-idle: 20
               max-total: 40
               min-idle: 10
-              timeout:
-                seconds: 60
-              ttl:
-                seconds: -1
+              timeout: 60s
+              ttl: -1s
+              stagnant: true
   mongo:
     consumer-list:
       - consumer: bsm
@@ -33,7 +32,7 @@ cache-provider:
             port: 27017
             password: asl123456
             database: captcha
-            store-class-name: ricciliao.cache.pojo.dto.CaptchaCacheDto
+            store-class-name: ricciliao.x.cache.pojo.bsm.CaptchaCacheDto
             addition:
               ttl: 60s
           - store: email
@@ -41,7 +40,7 @@ cache-provider:
             port: 27017
             password: asl123456
             database: email
-            store-class-name: ricciliao.cache.pojo.dto.EmailCacheDto
+            store-class-name: ricciliao.x.cache.pojo.bsm.EmailCacheDto
             addition:
               timeout: 60s
 ricciliao:

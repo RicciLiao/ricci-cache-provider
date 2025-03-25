@@ -1,7 +1,7 @@
 package ricciliao.cache.configuration.redis;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import ricciliao.x.component.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.CacheDto;
 import ricciliao.x.component.props.ApplicationProperties;
 
 import java.time.Duration;
@@ -115,6 +115,15 @@ public class RedisCacheAutoProperties extends ApplicationProperties {
                 private Integer minIdle = 2;
                 private Integer maxIdle = 5;
                 private Integer maxTotal = 20;
+                private Boolean stagnant = false;
+
+                public Boolean getStagnant() {
+                    return stagnant;
+                }
+
+                public void setStagnant(Boolean stagnant) {
+                    this.stagnant = stagnant;
+                }
 
                 public Duration getTimeout() {
                     return timeout;

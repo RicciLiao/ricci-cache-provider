@@ -6,10 +6,10 @@ import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import ricciliao.cache.configuration.redis.RedisCacheAutoProperties;
-import ricciliao.x.component.cache.pojo.CacheDto;
-import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.x.component.cache.pojo.ConsumerOperationDto;
-import ricciliao.x.component.cache.pojo.ProviderInfoDto;
+import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerOpDto;
+import ricciliao.x.cache.pojo.ProviderInfoDto;
 
 import java.time.Duration;
 import java.util.Comparator;
@@ -30,17 +30,17 @@ public class StringRedisTemplateProvider extends CacheProvider {
         this.redisTemplate = redisTemplate;
     }
 
-    public boolean create(ConsumerOperationDto<CacheDto> operation) {
+    public boolean create(ConsumerOpDto.Single<CacheDto> operation) {
         Duration duration = Objects.isNull(operation.getTtlOfMillis()) ? this.getTtl() : Duration.ofMillis(operation.getTtlOfMillis());
 
         return Boolean.TRUE.equals(
                 redisTemplate
                         .opsForValue()
-                        .setIfAbsent(operation.getId(), operation.getData(), duration)
+                        .setIfAbsent(operation.getData().getId(), operation.getData(), duration)
         );
     }
 
-    public boolean update(ConsumerOperationDto<CacheDto> operation) {
+    public boolean update(ConsumerOpDto.Single<CacheDto> operation) {
         Duration duration = Objects.isNull(operation.getTtlOfMillis()) ?
                 this.getTtl() : Duration.ofMillis(operation.getTtlOfMillis());
 
@@ -51,11 +51,11 @@ public class StringRedisTemplateProvider extends CacheProvider {
         );
     }
 
-    public ConsumerOperationDto<CacheDto> get(String key) {
+    public ConsumerOpDto.Single<CacheDto> get(String key) {
         Long ttlOfMillis = redisTemplate.getExpire(key, TimeUnit.MILLISECONDS);
         CacheDto data = redisTemplate.opsForValue().get(key);
 
-        return new ConsumerOperationDto<>(data, ttlOfMillis);
+        return new ConsumerOpDto.Single<>(data, ttlOfMillis);
     }
 
     public boolean delete(String key) {
@@ -64,8 +64,20 @@ public class StringRedisTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public List<ConsumerOperationDto<CacheDto>> list() {
+    public ConsumerOpDto.Batch<CacheDto> list() {
         return null;
+    }
+
+    @Override
+    public boolean create(ConsumerOpDto.Batch<CacheDto> operation) {
+        for (CacheDto cache : operation.getData()) {
+            if (!this.create(new ConsumerOpDto.Single<>(cache, operation.getTtlOfMillis()))) {
+
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override

@@ -20,7 +20,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.lang.Nullable;
 import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.component.MongoTemplateProvider;
-import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.component.utils.CoreUtils;
 import ricciliao.x.starter.PropsAutoConfiguration;
 
@@ -56,7 +56,7 @@ public class MongoCacheAutoConfiguration {
                 new MongoTemplateProvider(identifier, props, createMongoTemplate(identifier.getConsumer(), props)
                 )
         );
-        providerSelector.getCacheClass().put(identifier, props.getStoreClassName());
+        providerSelector.getCacheClassMap().put(identifier, props.getStoreClassName());
     }
 
     private MongoTemplate createMongoTemplate(String consumer,

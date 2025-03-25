@@ -11,9 +11,8 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.component.StringRedisTemplateProvider;
-import ricciliao.x.component.cache.pojo.CacheDto;
-import ricciliao.x.component.cache.pojo.ProviderInfoDto;
-import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.starter.PropsAutoConfiguration;
 
 @PropsAutoConfiguration(
@@ -49,7 +48,7 @@ public class RedisCacheAutoConfiguration {
                         redisTemplate(objectMapper, props)
                 )
         );
-        providerSelector.getCacheClass().put(identifier, props.getStoreClassName());
+        providerSelector.getCacheClassMap().put(identifier, props.getStoreClassName());
     }
 
     private RedisTemplate<String, CacheDto> redisTemplate(ObjectMapper objectMapper,

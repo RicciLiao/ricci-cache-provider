@@ -1,31 +1,29 @@
 package ricciliao.cache.service;
 
-import ricciliao.x.component.cache.pojo.CacheDto;
-import ricciliao.x.component.cache.pojo.CacheExtraOperationDto;
-import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.x.component.cache.pojo.ConsumerOperationBatchDto;
-import ricciliao.x.component.cache.pojo.ConsumerOperationDto;
-import ricciliao.x.component.cache.pojo.ProviderInfoDto;
 
-import java.util.List;
+import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.CacheExtraOperationDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerOpDto;
+import ricciliao.x.cache.pojo.ProviderInfoDto;
 
 public interface CacheService {
 
     String create(ConsumerIdentifierDto identifier,
-                  ConsumerOperationDto<CacheDto> operation);
+                  ConsumerOpDto.Single<CacheDto> operation);
 
     boolean update(ConsumerIdentifierDto identifier,
-                   ConsumerOperationDto<CacheDto> updating);
+                   ConsumerOpDto.Single<CacheDto> updating);
 
     boolean delete(ConsumerIdentifierDto identifier, String id);
 
-    ConsumerOperationDto<CacheDto> get(ConsumerIdentifierDto identifier, String id);
+    ConsumerOpDto.Single<CacheDto> get(ConsumerIdentifierDto identifier, String id);
 
-    List<ConsumerOperationDto<CacheDto>> list(ConsumerIdentifierDto identifier, CacheExtraOperationDto operation);
+    ConsumerOpDto.Batch<CacheDto> list(ConsumerIdentifierDto identifier, CacheExtraOperationDto operation);
 
-    ProviderInfoDto getProviderInfo(ConsumerIdentifierDto identifier);
+    ProviderInfoDto providerInfo(ConsumerIdentifierDto identifier);
 
     boolean create(ConsumerIdentifierDto identifier,
-                   ConsumerOperationBatchDto<CacheDto> operation);
+                   ConsumerOpDto.Batch<CacheDto> operation);
 
 }

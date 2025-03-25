@@ -6,12 +6,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import ricciliao.cache.configuration.mongo.MongoCacheAutoProperties;
-import ricciliao.x.component.cache.pojo.CacheDto;
-import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.x.component.cache.pojo.ConsumerOperationDto;
-import ricciliao.x.component.cache.pojo.ProviderInfoDto;
+import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerOpDto;
+import ricciliao.x.cache.pojo.ProviderInfoDto;
+import ricciliao.x.component.random.RandomGenerator;
 
-import java.util.List;
 import java.util.Objects;
 
 public class MongoTemplateProvider extends CacheProvider {
@@ -31,16 +31,17 @@ public class MongoTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public boolean create(ConsumerOperationDto<CacheDto> operation) {
+    public boolean create(ConsumerOpDto.Single<CacheDto> operation) {
+        operation.setId(RandomGenerator.nextString(12).allAtLeast(3).generate());
         mongoTemplate.insert(operation.getData(), collectionName);
 
         return true;
     }
 
     @Override
-    public boolean update(ConsumerOperationDto<CacheDto> operation) {
+    public boolean update(ConsumerOpDto.Single<CacheDto> operation) {
         UpdateResult result = mongoTemplate.replace(
-                Query.query(Criteria.where("cacheId").is(operation.getData().getCacheId())),
+                Query.query(Criteria.where("key").is(operation.getData().getId())),
                 operation.getData(),
                 collectionName
         );
@@ -49,16 +50,16 @@ public class MongoTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public ConsumerOperationDto<CacheDto> get(String key) {
+    public ConsumerOpDto.Single<CacheDto> get(String key) {
         CacheDto cache =
                 mongoTemplate.findOne(
-                        Query.query(Criteria.where("cacheId").is(key)),
+                        Query.query(Criteria.where("key").is(key)),
                         storeClassName,
                         collectionName
                 );
         if (Objects.nonNull(cache)) {
 
-            return new ConsumerOperationDto<>(cache, this.getTtl().toMillis());
+            return new ConsumerOpDto.Single<>(cache, this.getTtl().toMillis());
         }
 
         return null;
@@ -69,7 +70,7 @@ public class MongoTemplateProvider extends CacheProvider {
 
         return Objects.nonNull(
                 mongoTemplate.findAndRemove(
-                        Query.query(Criteria.where("cacheId").is(key)),
+                        Query.query(Criteria.where("key").is(key)),
                         storeClassName,
                         collectionName
                 )
@@ -77,8 +78,14 @@ public class MongoTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public List<ConsumerOperationDto<CacheDto>> list() {
+    public ConsumerOpDto.Batch<CacheDto> list() {
         return null;
+    }
+
+    @Override
+    public boolean create(ConsumerOpDto.Batch<CacheDto> operation) {
+
+        return false;
     }
 
     @Override

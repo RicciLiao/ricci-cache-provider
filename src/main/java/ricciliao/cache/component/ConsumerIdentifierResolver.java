@@ -6,11 +6,11 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import ricciliao.x.component.cache.CacheConstants;
-import ricciliao.x.component.cache.consumer.ConsumerIdentifier;
-import ricciliao.x.component.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.ConsumerIdentifier;
+import ricciliao.x.cache.XCacheConstants;
+import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 
-public class ConsumerIdentifierDtoResolver implements HandlerMethodArgumentResolver {
+public class ConsumerIdentifierResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -26,8 +26,8 @@ public class ConsumerIdentifierDtoResolver implements HandlerMethodArgumentResol
                                                  WebDataBinderFactory binderFactory) {
 
         return new ConsumerIdentifierDto(
-                webRequest.getHeader(CacheConstants.HTTP_HEADER_FOR_CACHE_CUSTOMER),
-                webRequest.getHeader(CacheConstants.HTTP_HEADER_FOR_CACHE_STORE)
+                webRequest.getHeader(XCacheConstants.HTTP_HEADER_FOR_CACHE_CUSTOMER),
+                webRequest.getHeader(XCacheConstants.HTTP_HEADER_FOR_CACHE_STORE)
         );
     }
 
