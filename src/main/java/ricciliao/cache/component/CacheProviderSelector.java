@@ -1,6 +1,7 @@
 package ricciliao.cache.component;
 
 
+import jakarta.annotation.Nullable;
 import ricciliao.x.cache.pojo.CacheDto;
 import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 
@@ -49,6 +50,7 @@ public class CacheProviderSelector {
         return null;
     }
 
+    @Nullable
     public Boolean getStagnant(ConsumerIdentifierDto identifier) {
         if (getCacheClassMap().containsKey(identifier)) {
 

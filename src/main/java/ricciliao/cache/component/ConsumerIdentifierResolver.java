@@ -1,7 +1,7 @@
 package ricciliao.cache.component;
 
+import jakarta.annotation.Nonnull;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.NonNull;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -20,7 +20,7 @@ public class ConsumerIdentifierResolver implements HandlerMethodArgumentResolver
     }
 
     @Override
-    public ConsumerIdentifierDto resolveArgument(@NonNull MethodParameter parameter,
+    public ConsumerIdentifierDto resolveArgument(@Nonnull MethodParameter parameter,
                                                  ModelAndViewContainer mavContainer,
                                                  NativeWebRequest webRequest,
                                                  WebDataBinderFactory binderFactory) {

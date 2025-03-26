@@ -1,17 +1,23 @@
 package ricciliao.cache.component;
 
 import com.mongodb.client.result.UpdateResult;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import ricciliao.cache.configuration.mongo.MongoCacheAutoProperties;
+import ricciliao.x.cache.CacheKey;
 import ricciliao.x.cache.pojo.CacheDto;
 import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.cache.pojo.ProviderInfoDto;
 import ricciliao.x.component.random.RandomGenerator;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class MongoTemplateProvider extends CacheProvider {
@@ -19,6 +25,7 @@ public class MongoTemplateProvider extends CacheProvider {
     private final MongoTemplate mongoTemplate;
     private final String collectionName;
     private final Class<? extends CacheDto> storeClassName;
+    private final String cacheKeyName;
 
     public MongoTemplateProvider(ConsumerIdentifierDto identifier,
                                  MongoCacheAutoProperties.ConsumerProperties.StoreProperties props,
@@ -28,6 +35,26 @@ public class MongoTemplateProvider extends CacheProvider {
         this.mongoTemplate = mongoTemplate;
         this.collectionName = props.getStore();
         this.storeClassName = props.getStoreClassName();
+        List<Field> keyFieldList =
+                Arrays.stream(this.storeClassName.getDeclaredFields())
+                        .filter(field -> field.isAnnotationPresent(CacheKey.class))
+                        .toList();
+        if (CollectionUtils.isEmpty(keyFieldList)) {
+            keyFieldList =
+                    Arrays.stream(this.storeClassName.getSuperclass().getDeclaredFields())
+                            .filter(field -> field.isAnnotationPresent(CacheKey.class))
+                            .toList();
+        }
+        if (CollectionUtils.size(keyFieldList) != 1) {
+
+            throw new BeanCreationException(
+                    String.format(
+                            "Initialize MongoTemplateProvider for collection: [%s] failed!",
+                            this.collectionName
+                    )
+            );
+        }
+        cacheKeyName = keyFieldList.get(0).getName();
     }
 
     @Override
@@ -41,7 +68,7 @@ public class MongoTemplateProvider extends CacheProvider {
     @Override
     public boolean update(ConsumerOpDto.Single<CacheDto> operation) {
         UpdateResult result = mongoTemplate.replace(
-                Query.query(Criteria.where("key").is(operation.getData().getId())),
+                Query.query(Criteria.where(cacheKeyName).is(operation.getData().getCacheKey())),
                 operation.getData(),
                 collectionName
         );
@@ -53,7 +80,7 @@ public class MongoTemplateProvider extends CacheProvider {
     public ConsumerOpDto.Single<CacheDto> get(String key) {
         CacheDto cache =
                 mongoTemplate.findOne(
-                        Query.query(Criteria.where("key").is(key)),
+                        Query.query(Criteria.where(cacheKeyName).is(key)),
                         storeClassName,
                         collectionName
                 );
@@ -70,7 +97,7 @@ public class MongoTemplateProvider extends CacheProvider {
 
         return Objects.nonNull(
                 mongoTemplate.findAndRemove(
-                        Query.query(Criteria.where("key").is(key)),
+                        Query.query(Criteria.where(cacheKeyName).is(key)),
                         storeClassName,
                         collectionName
                 )

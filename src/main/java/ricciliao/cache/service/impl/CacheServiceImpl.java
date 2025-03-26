@@ -29,7 +29,7 @@ public class CacheServiceImpl implements CacheService {
     public String create(ConsumerIdentifierDto identifier, ConsumerOpDto.Single<CacheDto> operation) {
         LocalDateTime now = LocalDateTime.now();
         if (Boolean.FALSE.equals(providerSelector.getStagnant(identifier))) {
-            operation.getData().setKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
+            operation.getData().setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
             operation.getData().setCreatedDtm(now);
             operation.getData().setUpdatedDtm(operation.getData().getCreatedDtm());
         }
@@ -37,12 +37,12 @@ public class CacheServiceImpl implements CacheService {
         operation.getData().setEffectedDtm(now);
         providerSelector.selectProvider(identifier).create(operation);
 
-        return operation.getData().getKey();
+        return operation.getData().getCacheKey();
     }
 
     @Override
     public boolean update(ConsumerIdentifierDto identifier, ConsumerOpDto.Single<CacheDto> updating) {
-        ConsumerOpDto.Single<CacheDto> existing = this.get(identifier, updating.getData().getKey());
+        ConsumerOpDto.Single<CacheDto> existing = this.get(identifier, updating.getData().getCacheKey());
         if (Objects.isNull(existing.getData())) {
 
             return false;
@@ -91,7 +91,7 @@ public class CacheServiceImpl implements CacheService {
         LocalDateTime now = LocalDateTime.now();
         if (Boolean.FALSE.equals(providerSelector.getStagnant(identifier))) {
             for (CacheDto cache : operation.getData()) {
-                cache.setKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
+                cache.setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
                 cache.setCreatedDtm(now);
                 cache.setUpdatedDtm(cache.getCreatedDtm());
                 cache.setEffectedDtm(now);

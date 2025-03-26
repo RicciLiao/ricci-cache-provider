@@ -36,7 +36,7 @@ public class StringRedisTemplateProvider extends CacheProvider {
         return Boolean.TRUE.equals(
                 redisTemplate
                         .opsForValue()
-                        .setIfAbsent(operation.getData().getId(), operation.getData(), duration)
+                        .setIfAbsent(operation.getData().getCacheKey(), operation.getData(), duration)
         );
     }
 

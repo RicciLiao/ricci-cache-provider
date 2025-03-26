@@ -2,6 +2,7 @@ package ricciliao.cache.component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -9,8 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.lang.NonNull;
-import ricciliao.cache.common.CacheConstants;
 import ricciliao.x.cache.ConsumerData;
 import ricciliao.x.cache.XCacheConstants;
 import ricciliao.x.cache.pojo.CacheDto;
@@ -38,15 +37,15 @@ public class ConsumerOpConverter extends AbstractHttpMessageConverter<ConsumerOp
     }
 
     @Override
-    protected boolean supports(@NonNull Class<?> clazz) {
+    protected boolean supports(@Nonnull Class<?> clazz) {
 
         return ConsumerOpDto.class.isAssignableFrom(clazz);
     }
 
-    @NonNull
+    @Nonnull
     @Override
-    protected ConsumerOpDto readInternal(@NonNull Class<? extends ConsumerOpDto> clazz,
-                                      @NonNull HttpInputMessage inputMessage) throws HttpMessageNotReadableException {
+    protected ConsumerOpDto readInternal(@Nonnull Class<? extends ConsumerOpDto> clazz,
+                                         @Nonnull HttpInputMessage inputMessage) throws HttpMessageNotReadableException {
 
         Optional<Field> dataFieldOptional = Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.isAnnotationPresent(ConsumerData.class)).findFirst();
         if (dataFieldOptional.isEmpty()) {
@@ -83,8 +82,8 @@ public class ConsumerOpConverter extends AbstractHttpMessageConverter<ConsumerOp
     }
 
     @Override
-    protected void writeInternal(@NonNull ConsumerOpDto consumerOperationDto,
-                                 @NonNull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+    protected void writeInternal(@Nonnull ConsumerOpDto consumerOperationDto,
+                                 @Nonnull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         objectMapper.writeValue(outputMessage.getBody(), consumerOperationDto);
     }
 
