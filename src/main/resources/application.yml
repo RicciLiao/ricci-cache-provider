@@ -22,7 +22,7 @@ cache-provider:
               min-idle: 10
               timeout: 60s
               ttl: -1s
-              stagnant: true
+              statical: true
   mongo:
     consumer-list:
       - consumer: bsm
@@ -43,6 +43,7 @@ cache-provider:
             store-class-name: ricciliao.x.cache.pojo.bsm.EmailCacheDto
             addition:
               timeout: 60s
+              statical: false
 ricciliao:
   x:
     common:

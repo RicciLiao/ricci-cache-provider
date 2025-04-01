@@ -115,14 +115,14 @@ public class RedisCacheAutoProperties extends ApplicationProperties {
                 private Integer minIdle = 2;
                 private Integer maxIdle = 5;
                 private Integer maxTotal = 20;
-                private Boolean stagnant = false;
+                private Boolean statical = false;
 
-                public Boolean getStagnant() {
-                    return stagnant;
+                public Boolean getStatical() {
+                    return statical;
                 }
 
-                public void setStagnant(Boolean stagnant) {
-                    this.stagnant = stagnant;
+                public void setStatical(Boolean statical) {
+                    this.statical = statical;
                 }
 
                 public Duration getTimeout() {

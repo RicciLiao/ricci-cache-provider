@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import ricciliao.cache.configuration.redis.RedisCacheAutoProperties;
 import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.CacheExtraOperationDto;
 import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.cache.pojo.ProviderInfoDto;
@@ -64,20 +65,8 @@ public class StringRedisTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public ConsumerOpDto.Batch<CacheDto> list() {
+    public ConsumerOpDto.Batch<CacheDto> list(CacheExtraOperationDto operation) {
         return null;
-    }
-
-    @Override
-    public boolean create(ConsumerOpDto.Batch<CacheDto> operation) {
-        for (CacheDto cache : operation.getData()) {
-            if (!this.create(new ConsumerOpDto.Single<>(cache, operation.getTtlOfMillis()))) {
-
-                return false;
-            }
-        }
-
-        return true;
     }
 
     @Override

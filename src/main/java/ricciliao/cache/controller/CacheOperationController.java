@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ricciliao.cache.service.CacheService;
 import ricciliao.x.cache.ConsumerIdentifier;
 import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.CacheExtraOperationDto;
 import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.component.response.ResponseData;
@@ -72,6 +74,14 @@ public class CacheOperationController {
                                            @RequestBody ConsumerOpDto.Batch<CacheDto> operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Bool(cacheService.create(identifier, operation)));
+    }
+
+    @Operation(description = "Retrieve list of existed record for the consumer(with identifier).")
+    @GetMapping("/")
+    public ResponseVo<ResponseData> list(@ConsumerIdentifier ConsumerIdentifierDto identifier,
+                                         @ModelAttribute CacheExtraOperationDto operation) {
+
+        return ResponseUtils.successResponse(cacheService.list(identifier, operation));
     }
 
 }

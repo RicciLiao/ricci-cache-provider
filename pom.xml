@@ -50,7 +50,7 @@
         </dependency>
         <dependency>
             <groupId>ricciliao.x</groupId>
-            <artifactId>cache-xprovider</artifactId>
+            <artifactId>cache-provider</artifactId>
         </dependency>
 
         <dependency>

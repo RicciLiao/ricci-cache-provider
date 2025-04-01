@@ -2,6 +2,7 @@ package ricciliao.cache.component;
 
 
 import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.CacheExtraOperationDto;
 import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.cache.pojo.ProviderInfoDto;
@@ -35,9 +36,18 @@ public abstract class CacheProvider {
 
     public abstract boolean delete(String key);
 
-    public abstract ConsumerOpDto.Batch<CacheDto> list();
+    public abstract ConsumerOpDto.Batch<CacheDto> list(CacheExtraOperationDto operation);
 
-    public abstract boolean create(ConsumerOpDto.Batch<CacheDto> operation);
+    public boolean create(ConsumerOpDto.Batch<CacheDto> operation) {
+        for (CacheDto cache : operation.getData()) {
+            if (!this.create(new ConsumerOpDto.Single<>(cache, operation.getTtlOfMillis()))) {
+
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public abstract ProviderInfoDto getProviderInfo();
 

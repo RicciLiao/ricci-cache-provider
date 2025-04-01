@@ -12,12 +12,12 @@ public class CacheProviderSelector {
 
     private final Map<ConsumerIdentifierDto, CacheProvider> cacheProviderMap;
     private final Map<ConsumerIdentifierDto, Class<? extends CacheDto>> cacheClassMap;
-    private final Map<ConsumerIdentifierDto, Boolean> stagnantMap;
+    private final Map<ConsumerIdentifierDto, Boolean> cacheStaticalMap;
 
     public CacheProviderSelector() {
         this.cacheProviderMap = new HashMap<>();
         this.cacheClassMap = new HashMap<>();
-        this.stagnantMap = new HashMap<>();
+        this.cacheStaticalMap = new HashMap<>();
     }
 
     public Map<ConsumerIdentifierDto, CacheProvider> getCacheProviderMap() {
@@ -28,8 +28,8 @@ public class CacheProviderSelector {
         return cacheClassMap;
     }
 
-    public Map<ConsumerIdentifierDto, Boolean> getStagnantMap() {
-        return stagnantMap;
+    public Map<ConsumerIdentifierDto, Boolean> getCacheStaticalMap() {
+        return cacheStaticalMap;
     }
 
     public CacheProvider selectProvider(ConsumerIdentifierDto identifier) {
@@ -51,10 +51,10 @@ public class CacheProviderSelector {
     }
 
     @Nullable
-    public Boolean getStagnant(ConsumerIdentifierDto identifier) {
+    public Boolean isStatical(ConsumerIdentifierDto identifier) {
         if (getCacheClassMap().containsKey(identifier)) {
 
-            return getStagnantMap().get(identifier);
+            return getCacheStaticalMap().get(identifier);
         }
 
         return null;

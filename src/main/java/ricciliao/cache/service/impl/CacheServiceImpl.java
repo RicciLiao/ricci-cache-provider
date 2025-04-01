@@ -28,13 +28,15 @@ public class CacheServiceImpl implements CacheService {
     @Override
     public String create(ConsumerIdentifierDto identifier, ConsumerOpDto.Single<CacheDto> operation) {
         LocalDateTime now = LocalDateTime.now();
-        if (Boolean.FALSE.equals(providerSelector.getStagnant(identifier))) {
-            operation.getData().setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
+        operation.getData().setEffectedDtm(now);
+        operation.getData().setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
+        if (Boolean.TRUE.equals(providerSelector.isStatical(identifier))) {
             operation.getData().setCreatedDtm(now);
             operation.getData().setUpdatedDtm(operation.getData().getCreatedDtm());
+        } else {
+            operation.getData().setCreatedDtm(now);
+            operation.getData().setUpdatedDtm(now);
         }
-
-        operation.getData().setEffectedDtm(now);
         providerSelector.selectProvider(identifier).create(operation);
 
         return operation.getData().getCacheKey();
@@ -50,7 +52,7 @@ public class CacheServiceImpl implements CacheService {
         updating.setTtlOfMillis(existing.getTtlOfMillis());
         updating.getData().setEffectedDtm(existing.getData().getEffectedDtm());
         updating.getData().setCreatedDtm(existing.getData().getCreatedDtm());
-        if (Boolean.FALSE.equals(providerSelector.getStagnant(identifier))) {
+        if (Boolean.FALSE.equals(providerSelector.isStatical(identifier))) {
             updating.getData().setUpdatedDtm(LocalDateTime.now());
         }
 
@@ -77,7 +79,7 @@ public class CacheServiceImpl implements CacheService {
     @Override
     public ConsumerOpDto.Batch<CacheDto> list(ConsumerIdentifierDto identifier, CacheExtraOperationDto operation) {
 
-        return null;
+        return providerSelector.selectProvider(identifier).list(operation);
     }
 
     @Override
@@ -89,7 +91,7 @@ public class CacheServiceImpl implements CacheService {
     @Override
     public boolean create(ConsumerIdentifierDto identifier, ConsumerOpDto.Batch<CacheDto> operation) {
         LocalDateTime now = LocalDateTime.now();
-        if (Boolean.FALSE.equals(providerSelector.getStagnant(identifier))) {
+        if (Boolean.FALSE.equals(providerSelector.isStatical(identifier))) {
             for (CacheDto cache : operation.getData()) {
                 cache.setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
                 cache.setCreatedDtm(now);

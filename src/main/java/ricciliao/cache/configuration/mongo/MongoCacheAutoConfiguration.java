@@ -31,7 +31,7 @@ import java.util.Set;
 
 @PropsAutoConfiguration(
         properties = MongoCacheAutoProperties.class,
-        conditionProperties = "cache-provider.mongo.consumer-list[0].consumer"
+        conditionalOnProperties = "cache-provider.mongo.consumer-list[0].consumer"
 )
 public class MongoCacheAutoConfiguration {
 
@@ -57,6 +57,7 @@ public class MongoCacheAutoConfiguration {
                 )
         );
         providerSelector.getCacheClassMap().put(identifier, props.getStoreClassName());
+        providerSelector.getCacheStaticalMap().put(identifier, props.getAddition().getStatical());
     }
 
     private MongoTemplate createMongoTemplate(String consumer,

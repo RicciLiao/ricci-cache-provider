@@ -17,7 +17,7 @@ import ricciliao.x.starter.PropsAutoConfiguration;
 
 @PropsAutoConfiguration(
         properties = RedisCacheAutoProperties.class,
-        conditionProperties = "cache-provider.redis.consumer-list[0].consumer"
+        conditionalOnProperties = "cache-provider.redis.consumer-list[0].consumer"
 )
 public class RedisCacheAutoConfiguration {
 

@@ -121,6 +121,15 @@ public class MongoCacheAutoProperties extends ApplicationProperties {
 
                 private Duration timeout = Duration.ofSeconds(30);
                 private Duration ttl = Duration.ofSeconds(60);
+                private Boolean statical = false;
+
+                public Boolean getStatical() {
+                    return statical;
+                }
+
+                public void setStatical(Boolean statical) {
+                    this.statical = statical;
+                }
 
                 public Duration getTimeout() {
                     return timeout;

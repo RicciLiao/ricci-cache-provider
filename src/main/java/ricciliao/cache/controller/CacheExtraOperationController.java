@@ -28,15 +28,6 @@ public class CacheExtraOperationController {
         this.cacheService = cacheService;
     }
 
-    @Operation(description = "Retrieve list of existed record for the consumer(with identifier).")
-    @GetMapping("/list")
-    public ResponseVo<ResponseData> list(@ConsumerIdentifier ConsumerIdentifierDto identifier,
-                                         @ModelAttribute CacheExtraOperationDto operation) {
-
-        return ResponseUtils.successResponse(cacheService.list(identifier, operation));
-    }
-
-
     @Operation(description = "Retrieve provider information for the consumer(with identifier).")
     @GetMapping("/providerInfo")
     public ResponseVo<ResponseData> providerInfo(@ConsumerIdentifier ConsumerIdentifierDto identifier) {

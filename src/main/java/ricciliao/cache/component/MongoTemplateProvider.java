@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import ricciliao.cache.configuration.mongo.MongoCacheAutoProperties;
 import ricciliao.x.cache.CacheKey;
 import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.pojo.CacheExtraOperationDto;
 import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.cache.pojo.ProviderInfoDto;
@@ -105,14 +106,9 @@ public class MongoTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public ConsumerOpDto.Batch<CacheDto> list() {
+    public ConsumerOpDto.Batch<CacheDto> list(CacheExtraOperationDto operation) {
+
         return null;
-    }
-
-    @Override
-    public boolean create(ConsumerOpDto.Batch<CacheDto> operation) {
-
-        return false;
     }
 
     @Override
