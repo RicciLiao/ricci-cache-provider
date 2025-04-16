@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.service.CacheService;
 import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.CacheExtraOperationDto;
 import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerOpBatchQueryDto;
 import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.cache.pojo.ProviderInfoDto;
 import ricciliao.x.component.random.RandomGenerator;
@@ -29,11 +29,12 @@ public class CacheServiceImpl implements CacheService {
     public String create(ConsumerIdentifierDto identifier, ConsumerOpDto.Single<CacheDto> operation) {
         LocalDateTime now = LocalDateTime.now();
         operation.getData().setEffectedDtm(now);
-        operation.getData().setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
         if (Boolean.TRUE.equals(providerSelector.isStatical(identifier))) {
             operation.getData().setCreatedDtm(now);
             operation.getData().setUpdatedDtm(operation.getData().getCreatedDtm());
+            operation.getData().generateCacheKey();
         } else {
+            operation.getData().setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
             operation.getData().setCreatedDtm(now);
             operation.getData().setUpdatedDtm(now);
         }
@@ -77,9 +78,9 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
-    public ConsumerOpDto.Batch<CacheDto> list(ConsumerIdentifierDto identifier, CacheExtraOperationDto operation) {
+    public ConsumerOpDto.Batch<CacheDto> list(ConsumerIdentifierDto identifier, ConsumerOpBatchQueryDto query) {
 
-        return providerSelector.selectProvider(identifier).list(operation);
+        return providerSelector.selectProvider(identifier).list(query);
     }
 
     @Override

@@ -2,8 +2,8 @@ package ricciliao.cache.service;
 
 
 import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.CacheExtraOperationDto;
 import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerOpBatchQueryDto;
 import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.cache.pojo.ProviderInfoDto;
 
@@ -19,7 +19,7 @@ public interface CacheService {
 
     ConsumerOpDto.Single<CacheDto> get(ConsumerIdentifierDto identifier, String id);
 
-    ConsumerOpDto.Batch<CacheDto> list(ConsumerIdentifierDto identifier, CacheExtraOperationDto operation);
+    ConsumerOpDto.Batch<CacheDto> list(ConsumerIdentifierDto identifier, ConsumerOpBatchQueryDto query);
 
     ProviderInfoDto providerInfo(ConsumerIdentifierDto identifier);
 

@@ -7,11 +7,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import ricciliao.cache.configuration.mongo.MongoCacheAutoProperties;
+import ricciliao.cache.common.CacheConstants;
 import ricciliao.x.cache.CacheKey;
 import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.CacheExtraOperationDto;
-import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerOpBatchQueryDto;
 import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.cache.pojo.ProviderInfoDto;
 import ricciliao.x.component.random.RandomGenerator;
@@ -23,26 +22,21 @@ import java.util.Objects;
 
 public class MongoTemplateProvider extends CacheProvider {
 
-    private final MongoTemplate mongoTemplate;
-    private final String collectionName;
-    private final Class<? extends CacheDto> storeClassName;
+    private final MongoTemplateProviderConstruct constr;
     private final String cacheKeyName;
 
-    public MongoTemplateProvider(ConsumerIdentifierDto identifier,
-                                 MongoCacheAutoProperties.ConsumerProperties.StoreProperties props,
-                                 MongoTemplate mongoTemplate) {
+    public MongoTemplateProvider(MongoTemplateProviderConstruct mongoTemplateProviderConstruct) {
+        super(mongoTemplateProviderConstruct);
+        this.constr = mongoTemplateProviderConstruct;
 
-        super(identifier, props.getAddition().getTtl());
-        this.mongoTemplate = mongoTemplate;
-        this.collectionName = props.getStore();
-        this.storeClassName = props.getStoreClassName();
+        Field[] fields = CacheDto.class.getDeclaredFields();
         List<Field> keyFieldList =
-                Arrays.stream(this.storeClassName.getDeclaredFields())
+                Arrays.stream(fields)
                         .filter(field -> field.isAnnotationPresent(CacheKey.class))
                         .toList();
         if (CollectionUtils.isEmpty(keyFieldList)) {
             keyFieldList =
-                    Arrays.stream(this.storeClassName.getSuperclass().getDeclaredFields())
+                    Arrays.stream(this.getStoreProps().getStoreClassName().getSuperclass().getDeclaredFields())
                             .filter(field -> field.isAnnotationPresent(CacheKey.class))
                             .toList();
         }
@@ -50,28 +44,28 @@ public class MongoTemplateProvider extends CacheProvider {
 
             throw new BeanCreationException(
                     String.format(
-                            "Initialize MongoTemplateProvider for collection: [%s] failed!",
-                            this.collectionName
+                            "Initialize MongoTemplateProvider for collection: [%s] failed! Can not identify the CacheKey.",
+                            this.getStoreProps().getStore()
                     )
             );
         }
-        cacheKeyName = keyFieldList.get(0).getName();
+        this.cacheKeyName = keyFieldList.get(0).getName();
     }
 
     @Override
     public boolean create(ConsumerOpDto.Single<CacheDto> operation) {
         operation.setId(RandomGenerator.nextString(12).allAtLeast(3).generate());
-        mongoTemplate.insert(operation.getData(), collectionName);
+        this.constr.mongoTemplate.insert(operation.getData(), this.getStoreProps().getStore());
 
         return true;
     }
 
     @Override
     public boolean update(ConsumerOpDto.Single<CacheDto> operation) {
-        UpdateResult result = mongoTemplate.replace(
-                Query.query(Criteria.where(cacheKeyName).is(operation.getData().getCacheKey())),
+        UpdateResult result = constr.mongoTemplate.replace(
+                Query.query(Criteria.where(this.cacheKeyName).is(operation.getData().getCacheKey())),
                 operation.getData(),
-                collectionName
+                this.getStoreProps().getStore()
         );
 
         return result.getModifiedCount() == 1;
@@ -80,14 +74,14 @@ public class MongoTemplateProvider extends CacheProvider {
     @Override
     public ConsumerOpDto.Single<CacheDto> get(String key) {
         CacheDto cache =
-                mongoTemplate.findOne(
-                        Query.query(Criteria.where(cacheKeyName).is(key)),
-                        storeClassName,
-                        collectionName
+                constr.mongoTemplate.findOne(
+                        Query.query(Criteria.where(this.cacheKeyName).is(key)),
+                        this.getStoreProps().getStoreClassName(),
+                        this.getStoreProps().getStore()
                 );
         if (Objects.nonNull(cache)) {
 
-            return new ConsumerOpDto.Single<>(cache, this.getTtl().toMillis());
+            return new ConsumerOpDto.Single<>(cache, this.getAdditionalProps().getTtl().toMillis());
         }
 
         return null;
@@ -97,36 +91,58 @@ public class MongoTemplateProvider extends CacheProvider {
     public boolean delete(String key) {
 
         return Objects.nonNull(
-                mongoTemplate.findAndRemove(
-                        Query.query(Criteria.where(cacheKeyName).is(key)),
-                        storeClassName,
-                        collectionName
+                constr.mongoTemplate.findAndRemove(
+                        Query.query(Criteria.where(this.cacheKeyName).is(key)),
+                        this.getStoreProps().getStoreClassName(),
+                        this.getStoreProps().getStore()
                 )
         );
     }
 
     @Override
-    public ConsumerOpDto.Batch<CacheDto> list(CacheExtraOperationDto operation) {
+    public ConsumerOpDto.Batch<CacheDto> list(ConsumerOpBatchQueryDto query) {
+        Query q = new Query();
+        q.limit(Objects.nonNull(query.getLimit()) ? query.getLimit().intValue() : CacheConstants.DEFAULT_CACHE_OP_BATCH_LIMIT);
 
-        return null;
+        if (Objects.nonNull(query.getSortBy())
+                && Objects.nonNull(query.getSortDirection())) {
+            q.with(Sort.by(Sort.Direction.fromString(query.getSortDirection().name()), query.getSortBy().name()));
+        }
+
+        List<CacheDto> data = constr.mongoTemplate.find(q, this.getStoreProps().getStoreClassName(), this.getStoreProps().getStore());
+
+        return new ConsumerOpDto.Batch<>(data, this.getStoreProps().getAddition().getTtl().toMillis());
     }
 
     @Override
     public ProviderInfoDto getProviderInfo() {
         CacheDto maxUpdatedDtm =
-                mongoTemplate.findOne(
+                constr.mongoTemplate.findOne(
                         new Query().with(Sort.by(Sort.Order.desc("updatedDtm"))).limit(1),
-                        storeClassName,
-                        collectionName
+                        this.getStoreProps().getStoreClassName(),
+                        this.getStoreProps().getStore()
                 );
         ProviderInfoDto result = new ProviderInfoDto(this.getConsumerIdentifier());
 
         if (Objects.nonNull(maxUpdatedDtm)) {
             result.setMaxUpdatedDtm(maxUpdatedDtm.getUpdatedDtm());
-            result.setCount(mongoTemplate.count(new Query(), collectionName));
+            result.setCount(constr.mongoTemplate.count(new Query(), this.getStoreProps().getStore()));
         }
 
         return result;
+    }
+
+    public static class MongoTemplateProviderConstruct extends CacheProviderConstruct {
+        private MongoTemplate mongoTemplate;
+
+        public MongoTemplate getMongoTemplate() {
+            return mongoTemplate;
+        }
+
+        public void setMongoTemplate(MongoTemplate mongoTemplate) {
+            this.mongoTemplate = mongoTemplate;
+        }
+
     }
 
 }

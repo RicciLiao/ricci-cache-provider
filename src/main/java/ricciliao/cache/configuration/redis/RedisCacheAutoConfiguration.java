@@ -1,19 +1,28 @@
+/*
+package ricciliao.cache.configuration.redis;*/
 package ricciliao.cache.configuration.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.util.ResourceUtils;
+import redis.clients.jedis.Connection;
+import redis.clients.jedis.DefaultJedisClientConfig;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisClientConfig;
+import redis.clients.jedis.JedisPooled;
+import redis.clients.jedis.search.IndexDefinition;
+import redis.clients.jedis.search.IndexOptions;
+import redis.clients.jedis.search.Schema;
 import ricciliao.cache.component.CacheProviderSelector;
-import ricciliao.cache.component.StringRedisTemplateProvider;
-import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.cache.component.JedisProvider;
 import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
 import ricciliao.x.starter.PropsAutoConfiguration;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @PropsAutoConfiguration(
         properties = RedisCacheAutoProperties.class,
@@ -21,9 +30,11 @@ import ricciliao.x.starter.PropsAutoConfiguration;
 )
 public class RedisCacheAutoConfiguration {
 
+    public static final String FT_RESULT_OK = "OK";
+
     public RedisCacheAutoConfiguration(@Autowired ObjectMapper objectMapper,
                                        @Autowired RedisCacheAutoProperties props,
-                                       @Autowired CacheProviderSelector providerSelector) {
+                                       @Autowired CacheProviderSelector providerSelector) throws IOException {
         for (RedisCacheAutoProperties.ConsumerProperties consumerProps : props.getConsumerList()) {
             for (RedisCacheAutoProperties.ConsumerProperties.StoreProperties storeProps : consumerProps.getStoreList()) {
                 this.createWrapper(
@@ -36,54 +47,91 @@ public class RedisCacheAutoConfiguration {
         }
     }
 
-    public void createWrapper(ConsumerIdentifierDto identifier,
-                              ObjectMapper objectMapper,
-                              RedisCacheAutoProperties.ConsumerProperties.StoreProperties props,
-                              CacheProviderSelector providerSelector) {
-        providerSelector.getCacheProviderMap().put(
-                identifier,
-                new StringRedisTemplateProvider(
-                        identifier,
-                        props,
-                        redisTemplate(objectMapper, props)
-                )
-        );
+    private void createWrapper(ConsumerIdentifierDto identifier,
+                               ObjectMapper objectMapper,
+                               RedisCacheAutoProperties.ConsumerProperties.StoreProperties props,
+                               CacheProviderSelector providerSelector) throws IOException {
+        String keyPrefix = "db" + props.getDatabase();
+        String indexName = keyPrefix + "_" + props.getStore() + "_index";
+        String upsertLua = this.loadLuaScript("redis_upsert.lua");
+        JedisPooled jedisPool = this.jedisPool(props);
+
+        JedisProvider.JedisProviderConstruct construct = new JedisProvider.JedisProviderConstruct();
+        construct.setUpsertLuaScript(upsertLua);
+        construct.setJedisPooled(this.jedisPool(props));
+        construct.setKeyPrefix(keyPrefix);
+        construct.setObjectMapper(objectMapper);
+        construct.setIndexName(indexName);
+        construct.setConsumerIdentifier(identifier);
+        construct.setStoreProps(props);
+
+        providerSelector.getCacheProviderMap().put(identifier, new JedisProvider(construct));
         providerSelector.getCacheClassMap().put(identifier, props.getStoreClassName());
+        providerSelector.getCacheStaticalMap().put(identifier, props.getAddition().getStatical());
+        this.createIndex(jedisPool, indexName, keyPrefix);
     }
 
-    private RedisTemplate<String, CacheDto> redisTemplate(ObjectMapper objectMapper,
-                                                          RedisCacheAutoProperties.ConsumerProperties.StoreProperties props) {
-        Jackson2JsonRedisSerializer<? extends CacheDto> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, props.getStoreClassName());
+    private JedisPooled jedisPool(RedisCacheAutoProperties.ConsumerProperties.StoreProperties props) {
+        HostAndPort hostAndPort = new HostAndPort(props.getHost(), props.getPort());
 
-        RedisTemplate<String, CacheDto> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(lettuceConnectionFactory(props, false));
-        redisTemplate.setValueSerializer(serializer);
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.afterPropertiesSet();
-
-        return redisTemplate;
-    }
-
-    private LettuceConnectionFactory lettuceConnectionFactory(RedisCacheAutoProperties.ConsumerProperties.StoreProperties props, boolean info) {
-
-        GenericObjectPoolConfig<RedisStandaloneConfiguration> poolConfig = new GenericObjectPoolConfig<>();
+        GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setMaxIdle(props.getAddition().getMaxIdle());
         poolConfig.setMaxTotal(props.getAddition().getMaxTotal());
         poolConfig.setMinIdle(props.getAddition().getMinIdle());
         poolConfig.setMaxWait(props.getAddition().getTimeout());
+        poolConfig.setTestOnBorrow(true);
+        poolConfig.setTestOnReturn(true);
+        poolConfig.setTestWhileIdle(true);
 
-        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(props.getHost(), props.getPort());
-        configuration.setDatabase(info ? 0 : props.getDatabase());
-        configuration.setPassword(props.getPassword());
+        JedisClientConfig clientConfig =
+                DefaultJedisClientConfig
+                        .builder()
+                        .connectionTimeoutMillis((int) poolConfig.getMaxWaitDuration().toMillis())
+                        .socketTimeoutMillis((int) poolConfig.getMaxWaitDuration().toMillis())
+                        .password(props.getPassword())
+                        .database(0)
+                        .build();
 
-        LettucePoolingClientConfiguration.LettucePoolingClientConfigurationBuilder builder = LettucePoolingClientConfiguration.builder();
-        builder.poolConfig(poolConfig);
-        builder.commandTimeout(poolConfig.getMaxWaitDuration());
-        LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory(configuration, builder.build());
-        connectionFactory.setValidateConnection(true);
-        connectionFactory.afterPropertiesSet();
+        return new JedisPooled(poolConfig, hostAndPort, clientConfig);
+    }
 
-        return connectionFactory;
+    public boolean createIndex(JedisPooled jedisPool,
+                               String indexName,
+                               String keyPrefix) {
+        if (this.indexExists(indexName, jedisPool)) {
+
+            return true;
+        }
+        Schema.Field cacheKey = new Schema.Field("$.cacheKey", Schema.FieldType.TEXT, true);
+        cacheKey.as("cacheKey");
+        Schema.Field createdDtm = new Schema.Field("$.createdDtm", Schema.FieldType.NUMERIC, true);
+        createdDtm.as("createdDtm");
+        Schema.Field updatedDtm = new Schema.Field("$.updatedDtm", Schema.FieldType.NUMERIC, true);
+        updatedDtm.as("updatedDtm");
+
+        String result = jedisPool.ftCreate(
+                indexName,
+                IndexOptions.defaultOptions().setDefinition(new IndexDefinition(IndexDefinition.Type.JSON).setPrefixes(keyPrefix)),
+                Schema.from(cacheKey, createdDtm, updatedDtm)
+        );
+
+        return FT_RESULT_OK.equalsIgnoreCase(result);
+    }
+
+    public boolean indexExists(String indexName, JedisPooled jedisPool) {
+
+        return CollectionUtils.isNotEmpty(
+                jedisPool.ftList()
+                        .stream()
+                        .filter(index -> index.equalsIgnoreCase(indexName))
+                        .toList()
+        );
+    }
+
+    public String loadLuaScript(String fileName) throws IOException {
+
+        return Files.readString(Paths.get(ResourceUtils.getFile("classpath:" + fileName).getPath()));
     }
 
 }
+
