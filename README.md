@@ -25,7 +25,7 @@ also, you can use more than one provider(s) at the same times if you need to cac
 Redis,
 and don`t worry about the implement, just define it and use it!
 
-#### 📝Configuration
+### 📝Configuration
 
 The **Cache Provider** include a custom starter which base on spring starter, you can config provider(s) properties in
 your `application.yml`
@@ -79,7 +79,7 @@ and use `mongo`, will MongoDB.
 
 As we know, the definition of starter properties are determined by the POJO class.
 
-* ##### ProviderCacheProperties.class
+* #### ProviderCacheProperties.class
 
   *please refer to `x-cache-components`*
 
@@ -114,11 +114,11 @@ public abstract static class AdditionalProperties {
 }
 ```
 
-* ##### ConsumerProperties.class
+* #### ConsumerProperties.class
 
     * `consumer`: define the identity code of service which will use this provider,
       like A service use A as code, B service as B.
-* ##### StoreProperties.class
+* #### StoreProperties.class
 
     * `store`: define the identity code of data which from the consumer.
     * `host`: MongoDB or Redis host.
@@ -126,15 +126,15 @@ public abstract static class AdditionalProperties {
     * `password`: MongoDB or Redis password.
     * `database`: MongoDB scheme or Redis DB index.
     * `storeClassName`: your data POJO class, it must extends `CacheDto.class`.
-* ##### AdditionalProperties.class
+* #### AdditionalProperties.class
 
     * `timeout`: connection pool timeout.
     * `ttl`: data expired time.
     * `statical`: true=static data, like some code list; false=dynamic data, which can be updated in real-time.
 
-#### 📝 Coding
+### 📝 Coding
 
-* ##### CacheDto.class
+* #### CacheDto.class
 
 ```java
 public abstract class CacheDto {
@@ -153,7 +153,7 @@ Define your own data POJO class and extends `CacheDto.class`.
 
 ---
 
-* ##### ConsumerIdentifierDto.class
+* #### ConsumerIdentifierDto.class
 
 ```java
 public class ConsumerIdentifierDto {
@@ -168,7 +168,7 @@ The identification of user data, please refer `📝Configuration`.
 
 ---
 
-* ##### ConsumerOpDto.class
+* #### ConsumerOpDto.class
 
 ```java
 public class ConsumerOpDto {
@@ -195,7 +195,7 @@ The CURD operations POJO for user, include batch and single operations.
 
 ---
 
-* ##### ConsumerOpBatchQueryDto.class
+* #### ConsumerOpBatchQueryDto.class
 
 ```java
 public class ConsumerOpBatchQueryDto {
@@ -212,7 +212,7 @@ You can use this operation POJO to retrieve a list of data by your criteria.
 
 ---
 
-* ##### ProviderInfoDto.class
+* #### ProviderInfoDto.class
 
 ```java
 public class ProviderInfoDto {
@@ -227,6 +227,29 @@ public class ProviderInfoDto {
 ```
 
 You can retrieve a provider information from this POJO.
+
+* ### 🎯 Interface
+
+    * *POST* `/operation`
+      Create a new record for the consumer(with identifier).
+
+    * *PUT* `/operation`
+      Update a existed record for the consumer(with identifier).
+
+    * *DELETE* `/operation/{id}`
+      Delete a existed record for the consumer(with identifier).
+
+    * *GET* `/operation/{id}`
+      Retrieve a existed record for the consumer(with identifier).
+
+    * *POST* `/operation/batch`
+      Batch create new records for the consumer(with identifier).
+
+    * *POST* `/operation/list`
+      Retrieve list of existed record for the consumer(with identifier).
+
+    * *GET* `/operation/extra/providerInfo`
+      Retrieve provider information for the consumer(with identifier).
 
 ---
 
