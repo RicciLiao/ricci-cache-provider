@@ -15,7 +15,7 @@
     <description>Cache Provider Interface Service</description>
 
     <properties>
-        <assembly-pojo-jar.finalName>cache-provider-components-${project.version}</assembly-pojo-jar.finalName>
+
     </properties>
 
     <dependencies>

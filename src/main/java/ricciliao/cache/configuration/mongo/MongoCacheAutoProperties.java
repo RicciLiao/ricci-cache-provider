@@ -20,19 +20,11 @@ public class MongoCacheAutoProperties extends ApplicationProperties {
         this.consumerList = consumerList;
     }
 
-    public static class ConsumerProperties {
+    public static class ConsumerProperties extends ProviderCacheProperties.ConsumerProperties {
 
-        private String consumer;
         private List<StoreProperties> storeList = new ArrayList<>();
 
-        public String getConsumer() {
-            return consumer;
-        }
-
-        public void setConsumer(String consumer) {
-            this.consumer = consumer;
-        }
-
+        @Override
         public List<StoreProperties> getStoreList() {
             return storeList;
         }
