@@ -21,6 +21,8 @@ public interface CacheService {
 
     ConsumerOpDto.Batch<CacheDto> list(ConsumerIdentifierDto identifier, ConsumerOpBatchQueryDto query);
 
+    boolean delete(ConsumerIdentifierDto identifier, ConsumerOpBatchQueryDto query);
+
     ProviderInfoDto providerInfo(ConsumerIdentifierDto identifier);
 
     boolean create(ConsumerIdentifierDto identifier,

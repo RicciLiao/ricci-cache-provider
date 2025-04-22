@@ -66,13 +66,20 @@ public class CacheOperationController {
         return ResponseUtils.successResponse(cacheService.get(identifier, id));
     }
 
-
     @Operation(description = "Batch create new records for the consumer(with identifier).")
     @PostMapping("/batch")
     public ResponseVo<ResponseData> create(@ConsumerIdentifier ConsumerIdentifierDto identifier,
                                            @RequestBody ConsumerOpDto.Batch<CacheDto> operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Bool(cacheService.create(identifier, operation)));
+    }
+
+    @Operation(description = "Batch delete existed records for the consumer(with identifier).")
+    @DeleteMapping("/batch")
+    public ResponseVo<ResponseData> delete(@ConsumerIdentifier ConsumerIdentifierDto identifier,
+                                           @RequestBody ConsumerOpBatchQueryDto query) {
+
+        return ResponseUtils.successResponse(new ResponseSimpleData.Bool(cacheService.delete(identifier, query)));
     }
 
     @Operation(description = "Retrieve list of existed record for the consumer(with identifier).")

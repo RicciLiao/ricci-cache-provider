@@ -19,7 +19,7 @@ import java.util.Map;
 public abstract class CacheProvider {
 
     private final CacheProviderConstruct constr;
-    private final Map<CacheQuery.Property, String> property2NameSortMap = new EnumMap<>(CacheQuery.Property.class);
+    private final Map<CacheQuery.Property, Field> property2NameSortMap = new EnumMap<>(CacheQuery.Property.class);
 
     protected CacheProvider(CacheProviderConstruct cacheProviderConstruct) {
         this.constr = cacheProviderConstruct;
@@ -28,13 +28,13 @@ public abstract class CacheProvider {
                 .filter(field -> field.isAnnotationPresent(CacheQuery.Support.class))
                 .forEach(field -> {
                     CacheQuery.Support sortProperty = field.getAnnotation(CacheQuery.Support.class);
-                    this.getProperty2NameSortMap().put(sortProperty.value(), field.getName());
+                    this.property2NameSortMap.put(sortProperty.value(), field);
                 });
-        if (MapUtils.isEmpty(this.getProperty2NameSortMap())) {
+        if (MapUtils.isEmpty(this.property2NameSortMap)) {
 
             throw new BeanCreationException(
                     String.format(
-                            "Initialize CacheProvider for consumer: [%s] failed!  Can not identify the SortProperty.",
+                            "Initialize CacheProvider for consumer: [%s] failed!  Can not identify the QueryProperty.",
                             this.constr.consumerIdentifier.toString()
                     )
             );
@@ -45,7 +45,7 @@ public abstract class CacheProvider {
         return this.constr.consumerIdentifier;
     }
 
-    public Map<CacheQuery.Property, String> getProperty2NameSortMap() {
+    public Map<CacheQuery.Property, Field> getProperty2NameSortMap() {
         return property2NameSortMap;
     }
 
@@ -77,6 +77,8 @@ public abstract class CacheProvider {
 
         return true;
     }
+
+    public abstract boolean delete(ConsumerOpBatchQueryDto query);
 
     public abstract ProviderInfoDto getProviderInfo();
 

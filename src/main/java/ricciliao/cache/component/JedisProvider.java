@@ -2,6 +2,7 @@ package ricciliao.cache.component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.search.Document;
@@ -18,15 +19,12 @@ import java.lang.reflect.Field;
 import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Objects;
 
 public class JedisProvider extends CacheProvider {
 
     private final JedisProviderConstruct constr;
     private final String upsertScript;
-    private final Map<CacheQuery.Property, Field> query2FieldMap = new EnumMap<>(CacheQuery.Property.class);
     private static final String Q_NUMBER_LUA = " @%s: [%s %s] ";
     private static final String Q_TEXT_LUA = " @%s: %s ";
 
@@ -34,13 +32,6 @@ public class JedisProvider extends CacheProvider {
         super(jedisProviderConstruct);
         this.constr = jedisProviderConstruct;
         this.upsertScript = this.constr.jedisPooled.scriptLoad(this.constr.upsertLuaScript);
-        Field[] fields = CacheDto.class.getDeclaredFields();
-        Arrays.stream(fields)
-                .filter(field -> field.isAnnotationPresent(CacheQuery.Support.class))
-                .forEach(field -> {
-                    CacheQuery.Support support = field.getAnnotation(CacheQuery.Support.class);
-                    query2FieldMap.put(support.value(), field);
-                });
     }
 
     @Override
@@ -106,44 +97,14 @@ public class JedisProvider extends CacheProvider {
     @Override
     public boolean delete(String key) {
 
-        return this.constr.jedisPooled.jsonDel(this.buildRedisKey(key)) == 1L;
+        return this.constr.jedisPooled.del(this.buildRedisKey(key)) == 1L;
     }
 
     @Override
     public ConsumerOpDto.Batch<CacheDto> list(ConsumerOpBatchQueryDto query) {
-        Query searchQ;
-        if (MapUtils.isNotEmpty(query.getCriteriaMap())) {
-            StringBuilder sbr = new StringBuilder();
-            query.getCriteriaMap().entrySet()
-                    .stream()
-                    .filter(es -> query2FieldMap.containsKey(es.getKey()))
-                    .forEach(es -> {
-                        Field field = query2FieldMap.get(es.getKey());
-                        if (Temporal.class.isAssignableFrom(field.getType())) {
-                            sbr.append(String.format(Q_NUMBER_LUA, field.getName(), es.getValue(), es.getValue()));
-                        } else if (String.class.isAssignableFrom(field.getType())) {
-                            sbr.append(String.format(Q_TEXT_LUA, field.getName(), es.getValue()));
-                        }
-                    });
-            searchQ = new Query(sbr.toString());
-        } else {
-            searchQ = new Query();
-        }
-
-        searchQ = searchQ.limit(0, Objects.nonNull(query.getLimit()) ? query.getLimit().intValue() : CacheConstants.DEFAULT_CACHE_OP_BATCH_LIMIT);
-
-        if (Objects.nonNull(query.getSortBy())
-                && Objects.nonNull(query.getSortDirection())
-                && query2FieldMap.containsKey(query.getSortBy())) {
-            searchQ.setSortBy(
-                    query2FieldMap.get(query.getSortBy()).getName(),
-                    CacheQuery.Sort.Direction.ASC.equals(query.getSortDirection())
-            );
-        }
-
         ConsumerOpDto.Batch<CacheDto> result = new ConsumerOpDto.Batch<>();
         result.setTtlOfMillis(this.constr.getStoreProps().getAddition().getTtl().toMillis());
-        SearchResult sr = this.constr.jedisPooled.ftSearch(this.constr.indexName, searchQ);
+        SearchResult sr = this.constr.jedisPooled.ftSearch(this.constr.indexName, this.toQuery(query));
         if (sr.getTotalResults() > 0) {
             try {
                 for (Document document : sr.getDocuments()) {
@@ -164,9 +125,80 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public ProviderInfoDto getProviderInfo() {
+    public boolean delete(ConsumerOpBatchQueryDto query) {
+        boolean finish = false;
+        while (!finish) {
+            ConsumerOpDto.Batch<CacheDto> batch = this.list(query);
+            if (CollectionUtils.isNotEmpty(batch.getData())) {
+                this.constr.jedisPooled.del(
+                        batch.getData().stream()
+                                .map(dto -> this.buildRedisKey(dto.getCacheKey()))
+                                .toArray(String[]::new)
+                );
+            } else {
+                finish = true;
+            }
+        }
 
-        return null;
+        return true;
+    }
+
+    @Override
+    public ProviderInfoDto getProviderInfo() {
+        ProviderInfoDto result = new ProviderInfoDto(this.getConsumerIdentifier());
+        long count = this.constr.jedisPooled
+                .ftSearch(
+                        this.constr.indexName,
+                        new Query("*").limit(0, 0)
+                )
+                .getTotalResults();
+        result.setCount(count);
+        if (count > 0) {
+            ConsumerOpBatchQueryDto query = new ConsumerOpBatchQueryDto();
+            query.setSortBy(CacheQuery.Property.UPDATED_DTM);
+            query.setSortDirection(CacheQuery.Sort.Direction.DESC);
+            query.setLimit(1L);
+
+            ConsumerOpDto.Batch<CacheDto> dto = this.list(query);
+            result.setCreatedDtm(dto.getData().get(0).getEffectedDtm());
+            result.setMaxUpdatedDtm(dto.getData().get(0).getUpdatedDtm());
+        }
+
+        return result;
+    }
+
+    protected Query toQuery(ConsumerOpBatchQueryDto query) {
+        Query searchQ;
+        if (MapUtils.isNotEmpty(query.getCriteriaMap())) {
+            StringBuilder sbr = new StringBuilder();
+            query.getCriteriaMap().entrySet()
+                    .stream()
+                    .filter(es -> this.getProperty2NameSortMap().containsKey(es.getKey()))
+                    .forEach(es -> {
+                        Field field = this.getProperty2NameSortMap().get(es.getKey());
+                        if (Temporal.class.isAssignableFrom(field.getType())) {
+                            sbr.append(String.format(Q_NUMBER_LUA, field.getName(), es.getValue(), es.getValue()));
+                        } else if (String.class.isAssignableFrom(field.getType())) {
+                            sbr.append(String.format(Q_TEXT_LUA, field.getName(), es.getValue()));
+                        }
+                    });
+            searchQ = new Query(sbr.toString());
+        } else {
+            searchQ = new Query();
+        }
+
+        searchQ = searchQ.limit(0, Objects.nonNull(query.getLimit()) ? query.getLimit().intValue() : CacheConstants.DEFAULT_CACHE_OP_BATCH_LIMIT);
+
+        if (Objects.nonNull(query.getSortBy())
+                && Objects.nonNull(query.getSortDirection())
+                && this.getProperty2NameSortMap().containsKey(query.getSortBy())) {
+            searchQ.setSortBy(
+                    this.getProperty2NameSortMap().get(query.getSortBy()).getName(),
+                    CacheQuery.Sort.Direction.ASC.equals(query.getSortDirection())
+            );
+        }
+
+        return searchQ;
     }
 
     private String buildRedisKey(String cacheKey) {

@@ -84,6 +84,12 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
+    public boolean delete(ConsumerIdentifierDto identifier, ConsumerOpBatchQueryDto query) {
+
+        return providerSelector.selectProvider(identifier).delete(query);
+    }
+
+    @Override
     public ProviderInfoDto providerInfo(ConsumerIdentifierDto identifier) {
 
         return providerSelector.selectProvider(identifier).getProviderInfo();
