@@ -1,6 +1,7 @@
 spring:
   application:
     version: @project.version@
+    name: cache-provider
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -48,3 +49,6 @@ ricciliao:
   x:
     common:
       time-zone: GMT+8
+    log:
+      executor:
+        enable: false
