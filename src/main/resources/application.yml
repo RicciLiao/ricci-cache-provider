@@ -12,9 +12,9 @@ cache-provider:
       - consumer: message
         store-list:
           - store: code
-            host: 192.168.165.31
-            port: 6382
-            password: asl123456
+            host: ${REDIS_HOST}
+            port: ${REDIS_PORT}
+            password: ${REDIS_PASSWORD}
             database: 1
             store-class-name: ricciliao.x.cache.pojo.message.MessageCodeCacheDto
             addition:
@@ -29,17 +29,17 @@ cache-provider:
       - consumer: bsm
         store-list:
           - store: captcha
-            host: 192.168.165.31
-            port: 27020
-            password: asl123456
+            host: ${MONGODB_HOST}
+            port: ${MONGODB_PORT}
+            password: ${MONGODB_PASSWORD}
             database: captcha
             store-class-name: ricciliao.x.cache.pojo.bsm.CaptchaCacheDto
             addition:
               ttl: 60s
           - store: email
-            host: 192.168.165.31
-            port: 27020
-            password: asl123456
+            host: ${MONGODB_HOST}
+            port: ${MONGODB_PORT}
+            password: ${MONGODB_PASSWORD}
             database: email
             store-class-name: ricciliao.x.cache.pojo.bsm.EmailCacheDto
             addition:
