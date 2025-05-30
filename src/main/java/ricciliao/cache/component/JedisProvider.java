@@ -14,6 +14,8 @@ import ricciliao.x.cache.pojo.CacheDto;
 import ricciliao.x.cache.pojo.ConsumerOpBatchQueryDto;
 import ricciliao.x.cache.pojo.ConsumerOpDto;
 import ricciliao.x.cache.pojo.ProviderInfoDto;
+import ricciliao.x.log.AuditLoggerFactory;
+import ricciliao.x.log.logger.AuditLogger;
 
 import java.lang.reflect.Field;
 import java.time.temporal.Temporal;
@@ -23,10 +25,13 @@ import java.util.Objects;
 
 public class JedisProvider extends CacheProvider {
 
+    private static final AuditLogger logger = AuditLoggerFactory.getLogger(JedisProvider.class);
+
     private final JedisProviderConstruct constr;
     private final String upsertScript;
     private static final String Q_NUMBER_LUA = " @%s: [%s %s] ";
     private static final String Q_TEXT_LUA = " @%s: %s ";
+    private static final String OP_FAILED = "Cannot operate cache for ";
 
     public JedisProvider(JedisProviderConstruct jedisProviderConstruct) {
         super(jedisProviderConstruct);
@@ -51,8 +56,7 @@ public class JedisProvider extends CacheProvider {
                             ).toString()
                     );
         } catch (Exception e) {
-            e.printStackTrace();
-            //TODO
+            logger.error(OP_FAILED + this.getConsumerIdentifier(), e);
 
             return false;
         }
@@ -75,8 +79,7 @@ public class JedisProvider extends CacheProvider {
                             ).toString()
                     );
         } catch (Exception e) {
-            e.printStackTrace();
-            //TODO
+            logger.error(OP_FAILED + this.getConsumerIdentifier(), e);
 
             return false;
         }
@@ -116,8 +119,7 @@ public class JedisProvider extends CacheProvider {
                     );
                 }
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
-                //TODO
+                logger.error(OP_FAILED + this.getConsumerIdentifier(), e);
             }
         }
 

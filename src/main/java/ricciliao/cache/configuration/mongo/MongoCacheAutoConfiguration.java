@@ -67,7 +67,7 @@ public class MongoCacheAutoConfiguration {
         builder.credential(MongoCredential.createCredential(consumer, props.getAuthDatabase(), props.getPassword().toCharArray()));
         MongoClientSettings settings =
                 builder.retryWrites(true)
-                        .applyConnectionString(new ConnectionString("mongodb://" + props.getHost()))
+                        .applyConnectionString(new ConnectionString("mongodb://" + props.getHost() + ":" + props.getPort()))
                         .build();
 
         SimpleMongoClientDatabaseFactory databaseFactory =

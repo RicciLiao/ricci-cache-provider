@@ -12,8 +12,8 @@ cache-provider:
       - consumer: message
         store-list:
           - store: code
-            host: 192.168.165.34
-            port: 6379
+            host: 192.168.165.31
+            port: 6382
             password: asl123456
             database: 1
             store-class-name: ricciliao.x.cache.pojo.message.MessageCodeCacheDto
@@ -29,16 +29,16 @@ cache-provider:
       - consumer: bsm
         store-list:
           - store: captcha
-            host: 192.168.165.34
-            port: 27017
+            host: 192.168.165.31
+            port: 27020
             password: asl123456
             database: captcha
             store-class-name: ricciliao.x.cache.pojo.bsm.CaptchaCacheDto
             addition:
               ttl: 60s
           - store: email
-            host: 192.168.165.34
-            port: 27017
+            host: 192.168.165.31
+            port: 27020
             password: asl123456
             database: email
             store-class-name: ricciliao.x.cache.pojo.bsm.EmailCacheDto

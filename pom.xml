@@ -136,7 +136,7 @@
                             <imageName>ricciliao/${project.artifactId}:1.0</imageName>
                             <baseImage>ricciliao/tomcat-jdk21:10.1.30</baseImage>
                             <cmd>["/opt/tomcat/bin/catalina.sh", "run"]</cmd>
-                            <dockerHost>http://192.168.165.33:2375</dockerHost>
+                            <dockerHost>http://192.168.165.34:2375</dockerHost>
                             <resources>
                                 <resource>
                                     <targetPath>/opt/tomcat/webapps</targetPath>
