@@ -1,31 +1,31 @@
 package ricciliao.cache.service;
 
 
+import ricciliao.x.cache.pojo.CacheBatchQuery;
 import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.x.cache.pojo.ConsumerOpBatchQueryDto;
-import ricciliao.x.cache.pojo.ConsumerOpDto;
-import ricciliao.x.cache.pojo.ProviderInfoDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifier;
+import ricciliao.x.cache.pojo.ConsumerOp;
+import ricciliao.x.cache.pojo.ProviderInfo;
 
 public interface CacheService {
 
-    String create(ConsumerIdentifierDto identifier,
-                  ConsumerOpDto.Single<CacheDto> operation);
+    String create(ConsumerIdentifier identifier,
+                  ConsumerOp.Single<CacheDto> operation);
 
-    boolean update(ConsumerIdentifierDto identifier,
-                   ConsumerOpDto.Single<CacheDto> updating);
+    boolean update(ConsumerIdentifier identifier,
+                   ConsumerOp.Single<CacheDto> updating);
 
-    boolean delete(ConsumerIdentifierDto identifier, String id);
+    boolean delete(ConsumerIdentifier identifier, String id);
 
-    ConsumerOpDto.Single<CacheDto> get(ConsumerIdentifierDto identifier, String id);
+    ConsumerOp.Single<CacheDto> get(ConsumerIdentifier identifier, String id);
 
-    ConsumerOpDto.Batch<CacheDto> list(ConsumerIdentifierDto identifier, ConsumerOpBatchQueryDto query);
+    ConsumerOp.Batch<CacheDto> list(ConsumerIdentifier identifier, CacheBatchQuery query);
 
-    boolean delete(ConsumerIdentifierDto identifier, ConsumerOpBatchQueryDto query);
+    boolean delete(ConsumerIdentifier identifier, CacheBatchQuery query);
 
-    ProviderInfoDto providerInfo(ConsumerIdentifierDto identifier);
+    ProviderInfo providerInfo(ConsumerIdentifier identifier);
 
-    boolean create(ConsumerIdentifierDto identifier,
-                   ConsumerOpDto.Batch<CacheDto> operation);
+    boolean create(ConsumerIdentifier identifier,
+                   ConsumerOp.Batch<CacheDto> operation);
 
 }

@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ricciliao.cache.service.CacheService;
-import ricciliao.x.cache.ConsumerIdentifier;
-import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.ConsumerId;
+import ricciliao.x.cache.pojo.ConsumerIdentifier;
 import ricciliao.x.component.response.ResponseData;
 import ricciliao.x.component.response.ResponseUtils;
 import ricciliao.x.component.response.ResponseVo;
@@ -28,7 +28,7 @@ public class CacheExtraOperationController {
 
     @Operation(description = "Retrieve provider information for the consumer(with identifier).")
     @GetMapping("/providerInfo")
-    public ResponseVo<ResponseData> providerInfo(@ConsumerIdentifier ConsumerIdentifierDto identifier) {
+    public ResponseVo<ResponseData> providerInfo(@ConsumerId ConsumerIdentifier identifier) {
 
         return ResponseUtils.successResponse(cacheService.providerInfo(identifier));
     }

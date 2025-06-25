@@ -24,29 +24,19 @@ public class MongoCacheAutoProperties extends ApplicationProperties {
 
         private List<StoreProperties> storeList = new ArrayList<>();
 
-
-        public void setStoreList(List<StoreProperties> storeList) {
-            this.storeList = storeList;
-        }
-
         @Override
         public List<StoreProperties> getStoreList() {
 
             return storeList;
         }
 
+        public void setStoreList(List<StoreProperties> storeList) {
+            this.storeList = storeList;
+        }
+
         public static class StoreProperties extends ProviderCacheProperties.StoreProperties {
 
-            private String authDatabase = "admin";
             private AdditionalProperties addition = new AdditionalProperties();
-
-            public String getAuthDatabase() {
-                return authDatabase;
-            }
-
-            public void setAuthDatabase(String authDatabase) {
-                this.authDatabase = authDatabase;
-            }
 
             @Override
             public AdditionalProperties getAddition() {

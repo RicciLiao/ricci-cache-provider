@@ -28,23 +28,14 @@ cache-provider:
     consumer-list:
       - consumer: bsm
         store-list:
-          - store: captcha
+          - store: challenge
             host: ${MONGODB_HOST}
             port: ${MONGODB_PORT}
             password: ${MONGODB_PASSWORD}
-            database: captcha
-            store-class-name: ricciliao.x.cache.pojo.bsm.CaptchaCacheDto
+            database: bsm
+            store-class-name: ricciliao.x.cache.pojo.common.ChallengeCacheDto
             addition:
-              ttl: 60s
-          - store: email
-            host: ${MONGODB_HOST}
-            port: ${MONGODB_PORT}
-            password: ${MONGODB_PASSWORD}
-            database: email
-            store-class-name: ricciliao.x.cache.pojo.bsm.EmailCacheDto
-            addition:
-              timeout: 60s
-              statical: false
+              ttl: 120s
 ricciliao:
   x:
     common:

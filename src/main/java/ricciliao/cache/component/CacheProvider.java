@@ -5,11 +5,11 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import ricciliao.x.cache.CacheQuery;
 import ricciliao.x.cache.ProviderCacheProperties;
+import ricciliao.x.cache.pojo.CacheBatchQuery;
 import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.x.cache.pojo.ConsumerOpBatchQueryDto;
-import ricciliao.x.cache.pojo.ConsumerOpDto;
-import ricciliao.x.cache.pojo.ProviderInfoDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifier;
+import ricciliao.x.cache.pojo.ConsumerOp;
+import ricciliao.x.cache.pojo.ProviderInfo;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -41,7 +41,7 @@ public abstract class CacheProvider {
         }
     }
 
-    public ConsumerIdentifierDto getConsumerIdentifier() {
+    public ConsumerIdentifier getConsumerIdentifier() {
         return this.constr.consumerIdentifier;
     }
 
@@ -57,19 +57,19 @@ public abstract class CacheProvider {
         return this.constr.storeProps.getAddition();
     }
 
-    public abstract boolean create(ConsumerOpDto.Single<CacheDto> operation);
+    public abstract boolean create(ConsumerOp.Single<CacheDto> operation);
 
-    public abstract boolean update(ConsumerOpDto.Single<CacheDto> operation);
+    public abstract boolean update(ConsumerOp.Single<CacheDto> operation);
 
-    public abstract ConsumerOpDto.Single<CacheDto> get(String key);
+    public abstract ConsumerOp.Single<CacheDto> get(String key);
 
     public abstract boolean delete(String key);
 
-    public abstract ConsumerOpDto.Batch<CacheDto> list(ConsumerOpBatchQueryDto query);
+    public abstract ConsumerOp.Batch<CacheDto> list(CacheBatchQuery query);
 
-    public boolean create(ConsumerOpDto.Batch<CacheDto> operation) {
+    public boolean create(ConsumerOp.Batch<CacheDto> operation) {
         for (CacheDto cache : operation.getData()) {
-            if (!this.create(new ConsumerOpDto.Single<>(cache, operation.getTtlOfMillis()))) {
+            if (!this.create(new ConsumerOp.Single<>(cache, operation.getTtlOfMillis()))) {
 
                 return false;
             }
@@ -78,19 +78,19 @@ public abstract class CacheProvider {
         return true;
     }
 
-    public abstract boolean delete(ConsumerOpBatchQueryDto query);
+    public abstract boolean delete(CacheBatchQuery query);
 
-    public abstract ProviderInfoDto getProviderInfo();
+    public abstract ProviderInfo getProviderInfo();
 
     public abstract static class CacheProviderConstruct {
-        private ConsumerIdentifierDto consumerIdentifier;
+        private ConsumerIdentifier consumerIdentifier;
         private ProviderCacheProperties.StoreProperties storeProps;
 
-        public ConsumerIdentifierDto getConsumerIdentifier() {
+        public ConsumerIdentifier getConsumerIdentifier() {
             return consumerIdentifier;
         }
 
-        public void setConsumerIdentifier(ConsumerIdentifierDto consumerIdentifier) {
+        public void setConsumerIdentifier(ConsumerIdentifier consumerIdentifier) {
             this.consumerIdentifier = consumerIdentifier;
         }
 

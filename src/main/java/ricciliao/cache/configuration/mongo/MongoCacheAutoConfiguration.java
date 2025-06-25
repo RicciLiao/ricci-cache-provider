@@ -20,7 +20,7 @@ import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.component.MongoTemplateProvider;
-import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifier;
 import ricciliao.x.component.utils.CoreUtils;
 import ricciliao.x.starter.PropsAutoConfiguration;
 
@@ -40,7 +40,7 @@ public class MongoCacheAutoConfiguration {
         for (MongoCacheAutoProperties.ConsumerProperties consumerProps : props.getConsumerList()) {
             for (MongoCacheAutoProperties.ConsumerProperties.StoreProperties storeProps : consumerProps.getStoreList()) {
                 this.createWrapper(
-                        new ConsumerIdentifierDto(consumerProps.getConsumer(), storeProps.getStore()),
+                        new ConsumerIdentifier(consumerProps.getConsumer(), storeProps.getStore()),
                         storeProps,
                         providerSelector
                 );
@@ -48,7 +48,7 @@ public class MongoCacheAutoConfiguration {
         }
     }
 
-    private void createWrapper(ConsumerIdentifierDto identifier,
+    private void createWrapper(ConsumerIdentifier identifier,
                                MongoCacheAutoProperties.ConsumerProperties.StoreProperties props,
                                CacheProviderSelector providerSelector) {
         MongoTemplateProvider.MongoTemplateProviderConstruct construct = new MongoTemplateProvider.MongoTemplateProviderConstruct();
@@ -64,7 +64,7 @@ public class MongoCacheAutoConfiguration {
     private MongoTemplate createMongoTemplate(String consumer,
                                               MongoCacheAutoProperties.ConsumerProperties.StoreProperties props) {
         MongoClientSettings.Builder builder = MongoClientSettings.builder();
-        builder.credential(MongoCredential.createCredential(consumer, props.getAuthDatabase(), props.getPassword().toCharArray()));
+        builder.credential(MongoCredential.createCredential(consumer, props.getDatabase(), props.getPassword().toCharArray()));
         MongoClientSettings settings =
                 builder.retryWrites(true)
                         .applyConnectionString(new ConnectionString("mongodb://" + props.getHost() + ":" + props.getPort()))

@@ -10,10 +10,10 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import ricciliao.cache.common.CacheConstants;
 import ricciliao.x.cache.CacheKey;
+import ricciliao.x.cache.pojo.CacheBatchQuery;
 import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.ConsumerOpBatchQueryDto;
-import ricciliao.x.cache.pojo.ConsumerOpDto;
-import ricciliao.x.cache.pojo.ProviderInfoDto;
+import ricciliao.x.cache.pojo.ConsumerOp;
+import ricciliao.x.cache.pojo.ProviderInfo;
 import ricciliao.x.component.random.RandomGenerator;
 
 import java.lang.reflect.Field;
@@ -54,7 +54,7 @@ public class MongoTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public boolean create(ConsumerOpDto.Single<CacheDto> operation) {
+    public boolean create(ConsumerOp.Single<CacheDto> operation) {
         operation.setId(RandomGenerator.nextString(12).allAtLeast(3).generate());
         this.constr.mongoTemplate.insert(operation.getData(), this.getStoreProps().getStore());
 
@@ -62,7 +62,7 @@ public class MongoTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public boolean update(ConsumerOpDto.Single<CacheDto> operation) {
+    public boolean update(ConsumerOp.Single<CacheDto> operation) {
         UpdateResult result = this.constr.mongoTemplate.replace(
                 Query.query(Criteria.where(this.cacheKeyName).is(operation.getData().getCacheKey())),
                 operation.getData(),
@@ -73,7 +73,7 @@ public class MongoTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public ConsumerOpDto.Single<CacheDto> get(String key) {
+    public ConsumerOp.Single<CacheDto> get(String key) {
         CacheDto cache =
                 this.constr.mongoTemplate.findOne(
                         Query.query(Criteria.where(this.cacheKeyName).is(key)),
@@ -82,7 +82,7 @@ public class MongoTemplateProvider extends CacheProvider {
                 );
         if (Objects.nonNull(cache)) {
 
-            return new ConsumerOpDto.Single<>(cache, this.getAdditionalProps().getTtl().toMillis());
+            return new ConsumerOp.Single<>(cache, this.getAdditionalProps().getTtl().toMillis());
         }
 
         return null;
@@ -101,7 +101,7 @@ public class MongoTemplateProvider extends CacheProvider {
     }
 
     @Override
-    public ConsumerOpDto.Batch<CacheDto> list(ConsumerOpBatchQueryDto query) {
+    public ConsumerOp.Batch<CacheDto> list(CacheBatchQuery query) {
         List<CacheDto> data =
                 this.constr.mongoTemplate.find(
                         this.toQuery(query),
@@ -109,25 +109,25 @@ public class MongoTemplateProvider extends CacheProvider {
                         this.getStoreProps().getStore()
                 );
 
-        return new ConsumerOpDto.Batch<>(data, this.getStoreProps().getAddition().getTtl().toMillis());
+        return new ConsumerOp.Batch<>(data, this.getStoreProps().getAddition().getTtl().toMillis());
     }
 
     @Override
-    public boolean delete(ConsumerOpBatchQueryDto query) {
+    public boolean delete(CacheBatchQuery query) {
         this.constr.mongoTemplate.remove(this.toQuery(query), this.getStoreProps().getStoreClassName());
 
         return false;
     }
 
     @Override
-    public ProviderInfoDto getProviderInfo() {
+    public ProviderInfo getProviderInfo() {
         CacheDto maxUpdatedDtm =
                 this.constr.mongoTemplate.findOne(
                         new Query().with(Sort.by(Sort.Order.desc("updatedDtm"))).limit(1),
                         this.getStoreProps().getStoreClassName(),
                         this.getStoreProps().getStore()
                 );
-        ProviderInfoDto result = new ProviderInfoDto(this.getConsumerIdentifier());
+        ProviderInfo result = new ProviderInfo(this.getConsumerIdentifier());
 
         if (Objects.nonNull(maxUpdatedDtm)) {
             result.setMaxUpdatedDtm(maxUpdatedDtm.getUpdatedDtm());
@@ -137,7 +137,7 @@ public class MongoTemplateProvider extends CacheProvider {
         return result;
     }
 
-    protected Query toQuery(ConsumerOpBatchQueryDto query) {
+    protected Query toQuery(CacheBatchQuery query) {
         Query q = new Query();
         q.limit(Objects.nonNull(query.getLimit()) ? query.getLimit().intValue() : CacheConstants.DEFAULT_CACHE_OP_BATCH_LIMIT);
 

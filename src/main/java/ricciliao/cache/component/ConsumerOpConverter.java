@@ -13,8 +13,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import ricciliao.x.cache.ConsumerData;
 import ricciliao.x.cache.XCacheConstants;
 import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
-import ricciliao.x.cache.pojo.ConsumerOpDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifier;
+import ricciliao.x.cache.pojo.ConsumerOp;
 import ricciliao.x.component.exception.CmnParameterException;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ConsumerOpConverter extends AbstractHttpMessageConverter<ConsumerOpDto> {
+public class ConsumerOpConverter extends AbstractHttpMessageConverter<ConsumerOp> {
 
     private final ObjectMapper objectMapper;
     private final CacheProviderSelector cacheProvider;
@@ -39,13 +39,13 @@ public class ConsumerOpConverter extends AbstractHttpMessageConverter<ConsumerOp
     @Override
     protected boolean supports(@Nonnull Class<?> clazz) {
 
-        return ConsumerOpDto.class.isAssignableFrom(clazz);
+        return ConsumerOp.class.isAssignableFrom(clazz);
     }
 
     @Nonnull
     @Override
-    protected ConsumerOpDto readInternal(@Nonnull Class<? extends ConsumerOpDto> clazz,
-                                         @Nonnull HttpInputMessage inputMessage) throws HttpMessageNotReadableException {
+    protected ConsumerOp readInternal(@Nonnull Class<? extends ConsumerOp> clazz,
+                                      @Nonnull HttpInputMessage inputMessage) throws HttpMessageNotReadableException {
 
         Optional<Field> dataFieldOptional = Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.isAnnotationPresent(ConsumerData.class)).findFirst();
         if (dataFieldOptional.isEmpty()) {
@@ -60,7 +60,7 @@ public class ConsumerOpConverter extends AbstractHttpMessageConverter<ConsumerOp
 
                 throw new CmnParameterException();
             }
-            ConsumerIdentifierDto identifier = new ConsumerIdentifierDto(customer.get(0), store.get(0));
+            ConsumerIdentifier identifier = new ConsumerIdentifier(customer.get(0), store.get(0));
             Class<? extends CacheDto> cacheClass = cacheProvider.getCacheClass(identifier);
             if (Objects.isNull(cacheClass)) {
 
@@ -77,12 +77,12 @@ public class ConsumerOpConverter extends AbstractHttpMessageConverter<ConsumerOp
             });
         } catch (Exception e) {
 
-            throw new HttpMessageNotReadableException("can not convert to " + ConsumerIdentifierDto.class, inputMessage);
+            throw new HttpMessageNotReadableException("can not convert to " + ConsumerIdentifier.class, inputMessage);
         }
     }
 
     @Override
-    protected void writeInternal(@Nonnull ConsumerOpDto consumerOperationDto,
+    protected void writeInternal(@Nonnull ConsumerOp consumerOperationDto,
                                  @Nonnull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         objectMapper.writeValue(outputMessage.getBody(), consumerOperationDto);
     }

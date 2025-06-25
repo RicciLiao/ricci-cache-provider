@@ -1,0 +1,4 @@
+db.createUser({user:'bsm',pwd:'asl123456',roles:[{role:'readWrite',db:'bsm'}]})
+db.createCollection("challenge")
+db.grantRolesToUser("bsm", [ { role: "dbAdmin", db: "bsm" } ])
+

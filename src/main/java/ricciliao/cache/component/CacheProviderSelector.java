@@ -3,16 +3,16 @@ package ricciliao.cache.component;
 
 import jakarta.annotation.Nullable;
 import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifier;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class CacheProviderSelector {
 
-    private final Map<ConsumerIdentifierDto, CacheProvider> cacheProviderMap;
-    private final Map<ConsumerIdentifierDto, Class<? extends CacheDto>> cacheClassMap;
-    private final Map<ConsumerIdentifierDto, Boolean> cacheStaticalMap;
+    private final Map<ConsumerIdentifier, CacheProvider> cacheProviderMap;
+    private final Map<ConsumerIdentifier, Class<? extends CacheDto>> cacheClassMap;
+    private final Map<ConsumerIdentifier, Boolean> cacheStaticalMap;
 
     public CacheProviderSelector() {
         this.cacheProviderMap = new HashMap<>();
@@ -20,19 +20,19 @@ public class CacheProviderSelector {
         this.cacheStaticalMap = new HashMap<>();
     }
 
-    public Map<ConsumerIdentifierDto, CacheProvider> getCacheProviderMap() {
+    public Map<ConsumerIdentifier, CacheProvider> getCacheProviderMap() {
         return cacheProviderMap;
     }
 
-    public Map<ConsumerIdentifierDto, Class<? extends CacheDto>> getCacheClassMap() {
+    public Map<ConsumerIdentifier, Class<? extends CacheDto>> getCacheClassMap() {
         return cacheClassMap;
     }
 
-    public Map<ConsumerIdentifierDto, Boolean> getCacheStaticalMap() {
+    public Map<ConsumerIdentifier, Boolean> getCacheStaticalMap() {
         return cacheStaticalMap;
     }
 
-    public CacheProvider selectProvider(ConsumerIdentifierDto identifier) {
+    public CacheProvider selectProvider(ConsumerIdentifier identifier) {
         if (getCacheProviderMap().containsKey(identifier)) {
 
             return getCacheProviderMap().get(identifier);
@@ -41,7 +41,7 @@ public class CacheProviderSelector {
         return null;
     }
 
-    public Class<? extends CacheDto> getCacheClass(ConsumerIdentifierDto identifier) {
+    public Class<? extends CacheDto> getCacheClass(ConsumerIdentifier identifier) {
         if (getCacheClassMap().containsKey(identifier)) {
 
             return getCacheClassMap().get(identifier);
@@ -51,7 +51,7 @@ public class CacheProviderSelector {
     }
 
     @Nullable
-    public Boolean isStatical(ConsumerIdentifierDto identifier) {
+    public Boolean isStatical(ConsumerIdentifier identifier) {
         if (getCacheClassMap().containsKey(identifier)) {
 
             return getCacheStaticalMap().get(identifier);

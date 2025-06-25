@@ -10,10 +10,10 @@ import redis.clients.jedis.search.Query;
 import redis.clients.jedis.search.SearchResult;
 import ricciliao.cache.common.CacheConstants;
 import ricciliao.x.cache.CacheQuery;
+import ricciliao.x.cache.pojo.CacheBatchQuery;
 import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.ConsumerOpBatchQueryDto;
-import ricciliao.x.cache.pojo.ConsumerOpDto;
-import ricciliao.x.cache.pojo.ProviderInfoDto;
+import ricciliao.x.cache.pojo.ConsumerOp;
+import ricciliao.x.cache.pojo.ProviderInfo;
 import ricciliao.x.log.AuditLoggerFactory;
 import ricciliao.x.log.logger.AuditLogger;
 
@@ -26,12 +26,11 @@ import java.util.Objects;
 public class JedisProvider extends CacheProvider {
 
     private static final AuditLogger logger = AuditLoggerFactory.getLogger(JedisProvider.class);
-
-    private final JedisProviderConstruct constr;
-    private final String upsertScript;
     private static final String Q_NUMBER_LUA = " @%s: [%s %s] ";
     private static final String Q_TEXT_LUA = " @%s: %s ";
     private static final String OP_FAILED = "Cannot operate cache for ";
+    private final JedisProviderConstruct constr;
+    private final String upsertScript;
 
     public JedisProvider(JedisProviderConstruct jedisProviderConstruct) {
         super(jedisProviderConstruct);
@@ -40,7 +39,7 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public boolean create(ConsumerOpDto.Single<CacheDto> operation) {
+    public boolean create(ConsumerOp.Single<CacheDto> operation) {
         try {
 
             return 1L ==
@@ -63,7 +62,7 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public boolean update(ConsumerOpDto.Single<CacheDto> operation) {
+    public boolean update(ConsumerOp.Single<CacheDto> operation) {
         try {
 
             return 1L ==
@@ -86,9 +85,9 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public ConsumerOpDto.Single<CacheDto> get(String key) {
+    public ConsumerOp.Single<CacheDto> get(String key) {
 
-        return new ConsumerOpDto.Single<>(
+        return new ConsumerOp.Single<>(
                 this.constr.objectMapper.convertValue(
                         this.constr.jedisPooled.jsonGet(this.buildRedisKey(key)),
                         this.getStoreProps().getStoreClassName()
@@ -104,8 +103,8 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public ConsumerOpDto.Batch<CacheDto> list(ConsumerOpBatchQueryDto query) {
-        ConsumerOpDto.Batch<CacheDto> result = new ConsumerOpDto.Batch<>();
+    public ConsumerOp.Batch<CacheDto> list(CacheBatchQuery query) {
+        ConsumerOp.Batch<CacheDto> result = new ConsumerOp.Batch<>();
         result.setTtlOfMillis(this.constr.getStoreProps().getAddition().getTtl().toMillis());
         SearchResult sr = this.constr.jedisPooled.ftSearch(this.constr.indexName, this.toQuery(query));
         if (sr.getTotalResults() > 0) {
@@ -127,10 +126,10 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public boolean delete(ConsumerOpBatchQueryDto query) {
+    public boolean delete(CacheBatchQuery query) {
         boolean finish = false;
         while (!finish) {
-            ConsumerOpDto.Batch<CacheDto> batch = this.list(query);
+            ConsumerOp.Batch<CacheDto> batch = this.list(query);
             if (CollectionUtils.isNotEmpty(batch.getData())) {
                 this.constr.jedisPooled.del(
                         batch.getData().stream()
@@ -146,8 +145,8 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public ProviderInfoDto getProviderInfo() {
-        ProviderInfoDto result = new ProviderInfoDto(this.getConsumerIdentifier());
+    public ProviderInfo getProviderInfo() {
+        ProviderInfo result = new ProviderInfo(this.getConsumerIdentifier());
         long count = this.constr.jedisPooled
                 .ftSearch(
                         this.constr.indexName,
@@ -156,12 +155,12 @@ public class JedisProvider extends CacheProvider {
                 .getTotalResults();
         result.setCount(count);
         if (count > 0) {
-            ConsumerOpBatchQueryDto query = new ConsumerOpBatchQueryDto();
+            CacheBatchQuery query = new CacheBatchQuery();
             query.setSortBy(CacheQuery.Property.UPDATED_DTM);
             query.setSortDirection(CacheQuery.Sort.Direction.DESC);
             query.setLimit(1L);
 
-            ConsumerOpDto.Batch<CacheDto> dto = this.list(query);
+            ConsumerOp.Batch<CacheDto> dto = this.list(query);
             result.setCreatedDtm(dto.getData().get(0).getEffectedDtm());
             result.setMaxUpdatedDtm(dto.getData().get(0).getUpdatedDtm());
         }
@@ -169,7 +168,7 @@ public class JedisProvider extends CacheProvider {
         return result;
     }
 
-    protected Query toQuery(ConsumerOpBatchQueryDto query) {
+    protected Query toQuery(CacheBatchQuery query) {
         Query searchQ;
         if (MapUtils.isNotEmpty(query.getCriteriaMap())) {
             StringBuilder sbr = new StringBuilder();

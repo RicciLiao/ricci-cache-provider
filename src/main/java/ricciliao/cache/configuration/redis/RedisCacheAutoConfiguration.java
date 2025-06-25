@@ -17,7 +17,7 @@ import redis.clients.jedis.search.IndexOptions;
 import redis.clients.jedis.search.Schema;
 import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.component.JedisProvider;
-import ricciliao.x.cache.pojo.ConsumerIdentifierDto;
+import ricciliao.x.cache.pojo.ConsumerIdentifier;
 import ricciliao.x.starter.PropsAutoConfiguration;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class RedisCacheAutoConfiguration {
         for (RedisCacheAutoProperties.ConsumerProperties consumerProps : props.getConsumerList()) {
             for (RedisCacheAutoProperties.ConsumerProperties.StoreProperties storeProps : consumerProps.getStoreList()) {
                 this.createWrapper(
-                        new ConsumerIdentifierDto(consumerProps.getConsumer(), storeProps.getStore()),
+                        new ConsumerIdentifier(consumerProps.getConsumer(), storeProps.getStore()),
                         objectMapper,
                         storeProps,
                         providerSelector
@@ -47,7 +47,7 @@ public class RedisCacheAutoConfiguration {
         }
     }
 
-    private void createWrapper(ConsumerIdentifierDto identifier,
+    private void createWrapper(ConsumerIdentifier identifier,
                                ObjectMapper objectMapper,
                                RedisCacheAutoProperties.ConsumerProperties.StoreProperties props,
                                CacheProviderSelector providerSelector) throws IOException {
