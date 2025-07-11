@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ricciliao.cache.service.CacheService;
-import ricciliao.x.cache.ConsumerId;
+import ricciliao.x.cache.annotation.ConsumerId;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
 import ricciliao.x.component.response.ResponseData;
 import ricciliao.x.component.response.ResponseUtils;

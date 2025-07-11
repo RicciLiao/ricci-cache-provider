@@ -1,7 +1,7 @@
 package ricciliao.cache.configuration.redis;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import ricciliao.x.cache.ProviderCacheProperties;
+import ricciliao.cache.properties.ProviderCacheProperties;
 import ricciliao.x.component.props.ApplicationProperties;
 
 import java.util.ArrayList;

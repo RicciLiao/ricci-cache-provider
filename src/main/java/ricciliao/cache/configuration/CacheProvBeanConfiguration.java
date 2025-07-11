@@ -10,7 +10,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.component.ConsumerIdentifierResolver;
-import ricciliao.cache.component.ConsumerOpConverter;
+import ricciliao.cache.component.ProviderOpBatchConverter;
+import ricciliao.cache.component.ProviderOpSingleConverter;
 import ricciliao.cache.configuration.mongo.MongoCacheAutoConfiguration;
 import ricciliao.cache.configuration.redis.RedisCacheAutoConfiguration;
 
@@ -30,20 +31,21 @@ public class CacheProvBeanConfiguration implements WebMvcConfigurer {
         this.objectMapper = objectMapper;
     }
 
-    @Bean
-    public CacheProviderSelector providerSelector() {
-
-        return new CacheProviderSelector();
-    }
-
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(0, new ConsumerOpConverter(objectMapper, providerSelector()));
+        converters.add(0, new ProviderOpSingleConverter(objectMapper, providerSelector()));
+        converters.add(1, new ProviderOpBatchConverter(objectMapper, providerSelector()));
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new ConsumerIdentifierResolver());
+    }
+
+    @Bean
+    public CacheProviderSelector providerSelector() {
+
+        return new CacheProviderSelector();
     }
 
 }

@@ -3,13 +3,14 @@ package ricciliao.cache.component;
 
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.BeanCreationException;
-import ricciliao.x.cache.CacheQuery;
-import ricciliao.x.cache.ProviderCacheProperties;
-import ricciliao.x.cache.pojo.CacheBatchQuery;
-import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.cache.ProviderCacheStore;
+import ricciliao.cache.ProviderOp;
+import ricciliao.cache.properties.ProviderCacheProperties;
+import ricciliao.x.cache.pojo.CacheStore;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
-import ricciliao.x.cache.pojo.ConsumerOp;
 import ricciliao.x.cache.pojo.ProviderInfo;
+import ricciliao.x.cache.query.CacheBatchQuery;
+import ricciliao.x.cache.query.CacheQuery;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -23,7 +24,7 @@ public abstract class CacheProvider {
 
     protected CacheProvider(CacheProviderConstruct cacheProviderConstruct) {
         this.constr = cacheProviderConstruct;
-        Field[] fields = CacheDto.class.getDeclaredFields();
+        Field[] fields = CacheStore.class.getDeclaredFields();
         Arrays.stream(fields)
                 .filter(field -> field.isAnnotationPresent(CacheQuery.Support.class))
                 .forEach(field -> {
@@ -57,19 +58,19 @@ public abstract class CacheProvider {
         return this.constr.storeProps.getAddition();
     }
 
-    public abstract boolean create(ConsumerOp.Single<CacheDto> operation);
+    public abstract boolean create(ProviderOp.Single operation);
 
-    public abstract boolean update(ConsumerOp.Single<CacheDto> operation);
+    public abstract boolean update(ProviderOp.Single operation);
 
-    public abstract ConsumerOp.Single<CacheDto> get(String key);
+    public abstract ProviderOp.Single get(String key);
 
     public abstract boolean delete(String key);
 
-    public abstract ConsumerOp.Batch<CacheDto> list(CacheBatchQuery query);
+    public abstract ProviderOp.Batch list(CacheBatchQuery query);
 
-    public boolean create(ConsumerOp.Batch<CacheDto> operation) {
-        for (CacheDto cache : operation.getData()) {
-            if (!this.create(new ConsumerOp.Single<>(cache, operation.getTtlOfMillis()))) {
+    public boolean create(ProviderOp.Batch operation) {
+        for (ProviderCacheStore cache : operation.getData()) {
+            if (!this.create(new ProviderOp.Single(operation.getTtlOfSeconds(), cache))) {
 
                 return false;
             }

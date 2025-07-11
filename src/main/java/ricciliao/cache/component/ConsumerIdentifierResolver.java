@@ -6,8 +6,8 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import ricciliao.x.cache.ConsumerId;
 import ricciliao.x.cache.XCacheConstants;
+import ricciliao.x.cache.annotation.ConsumerId;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
 
 public class ConsumerIdentifierResolver implements HandlerMethodArgumentResolver {

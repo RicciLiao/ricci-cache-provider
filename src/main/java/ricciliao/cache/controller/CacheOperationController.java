@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ricciliao.cache.ProviderOp;
 import ricciliao.cache.service.CacheService;
-import ricciliao.x.cache.ConsumerId;
-import ricciliao.x.cache.pojo.CacheBatchQuery;
-import ricciliao.x.cache.pojo.CacheDto;
+import ricciliao.x.cache.annotation.ConsumerId;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
-import ricciliao.x.cache.pojo.ConsumerOp;
+import ricciliao.x.cache.query.CacheBatchQuery;
 import ricciliao.x.component.response.ResponseData;
 import ricciliao.x.component.response.ResponseSimpleData;
 import ricciliao.x.component.response.ResponseUtils;
@@ -37,7 +36,7 @@ public class CacheOperationController {
     @Operation(description = "Create a new record for the consumer(with identifier).")
     @PostMapping("")
     public ResponseVo<ResponseData> create(@ConsumerId ConsumerIdentifier identifier,
-                                           @RequestBody ConsumerOp.Single<CacheDto> operation) {
+                                           @RequestBody ProviderOp.Single operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Str(cacheService.create(identifier, operation)));
     }
@@ -45,7 +44,7 @@ public class CacheOperationController {
     @Operation(description = "Update a existed record for the consumer(with identifier).")
     @PutMapping("")
     public ResponseVo<ResponseData> update(@ConsumerId ConsumerIdentifier identifier,
-                                           @RequestBody ConsumerOp.Single<CacheDto> operation) {
+                                           @RequestBody ProviderOp.Single operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Bool(cacheService.update(identifier, operation)));
     }
@@ -60,16 +59,16 @@ public class CacheOperationController {
 
     @Operation(description = "Retrieve a existed record for the consumer(with identifier).")
     @GetMapping("/{id}")
-    public ResponseVo<ResponseData> get(@ConsumerId ConsumerIdentifier identifier,
-                                        @PathVariable(name = "id") String id) {
+    public ProviderOp.Single get(@ConsumerId ConsumerIdentifier identifier,
+                                 @PathVariable(name = "id") String id) {
 
-        return ResponseUtils.successResponse(cacheService.get(identifier, id));
+        return cacheService.get(identifier, id);
     }
 
     @Operation(description = "Batch create new records for the consumer(with identifier).")
     @PostMapping("/batch")
     public ResponseVo<ResponseData> create(@ConsumerId ConsumerIdentifier identifier,
-                                           @RequestBody ConsumerOp.Batch<CacheDto> operation) {
+                                           @RequestBody ProviderOp.Batch operation) {
 
         return ResponseUtils.successResponse(new ResponseSimpleData.Bool(cacheService.create(identifier, operation)));
     }
@@ -84,10 +83,10 @@ public class CacheOperationController {
 
     @Operation(description = "Retrieve list of existed record for the consumer(with identifier).")
     @PostMapping("/list")
-    public ResponseVo<ResponseData> list(@ConsumerId ConsumerIdentifier identifier,
-                                         @RequestBody CacheBatchQuery query) {
+    public ProviderOp.Batch list(@ConsumerId ConsumerIdentifier identifier,
+                                 @RequestBody CacheBatchQuery query) {
 
-        return ResponseUtils.successResponse(cacheService.list(identifier, query));
+        return cacheService.list(identifier, query);
     }
 
 }

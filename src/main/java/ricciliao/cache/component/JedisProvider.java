@@ -2,18 +2,17 @@ package ricciliao.cache.component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import redis.clients.jedis.JedisPooled;
-import redis.clients.jedis.search.Document;
 import redis.clients.jedis.search.Query;
 import redis.clients.jedis.search.SearchResult;
+import ricciliao.cache.ProviderCacheStore;
+import ricciliao.cache.ProviderOp;
 import ricciliao.cache.common.CacheConstants;
-import ricciliao.x.cache.CacheQuery;
-import ricciliao.x.cache.pojo.CacheBatchQuery;
-import ricciliao.x.cache.pojo.CacheDto;
-import ricciliao.x.cache.pojo.ConsumerOp;
 import ricciliao.x.cache.pojo.ProviderInfo;
+import ricciliao.x.cache.query.CacheBatchQuery;
+import ricciliao.x.cache.query.CacheQuery;
 import ricciliao.x.log.AuditLoggerFactory;
 import ricciliao.x.log.logger.AuditLogger;
 
@@ -28,7 +27,7 @@ public class JedisProvider extends CacheProvider {
     private static final AuditLogger logger = AuditLoggerFactory.getLogger(JedisProvider.class);
     private static final String Q_NUMBER_LUA = " @%s: [%s %s] ";
     private static final String Q_TEXT_LUA = " @%s: %s ";
-    private static final String OP_FAILED = "Cannot operate cache for ";
+    private static final String OP_FAILED = "Cannot operate cache for {}";
     private final JedisProviderConstruct constr;
     private final String upsertScript;
 
@@ -39,7 +38,7 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public boolean create(ConsumerOp.Single<CacheDto> operation) {
+    public boolean create(ProviderOp.Single operation) {
         try {
 
             return 1L ==
@@ -55,14 +54,14 @@ public class JedisProvider extends CacheProvider {
                             ).toString()
                     );
         } catch (Exception e) {
-            logger.error(OP_FAILED + this.getConsumerIdentifier(), e);
+            logger.error(OP_FAILED, this.getConsumerIdentifier(), e);
 
             return false;
         }
     }
 
     @Override
-    public boolean update(ConsumerOp.Single<CacheDto> operation) {
+    public boolean update(ProviderOp.Single operation) {
         try {
 
             return 1L ==
@@ -85,14 +84,14 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public ConsumerOp.Single<CacheDto> get(String key) {
+    public ProviderOp.Single get(String key) {
 
-        return new ConsumerOp.Single<>(
+        return new ProviderOp.Single(
+                this.getStoreProps().getAddition().getTtl().toSeconds(),
                 this.constr.objectMapper.convertValue(
                         this.constr.jedisPooled.jsonGet(this.buildRedisKey(key)),
-                        this.getStoreProps().getStoreClassName()
-                ),
-                this.getStoreProps().getAddition().getTtl().toMillis()
+                        ProviderCacheStore.class
+                )
         );
     }
 
@@ -103,23 +102,24 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public ConsumerOp.Batch<CacheDto> list(CacheBatchQuery query) {
-        ConsumerOp.Batch<CacheDto> result = new ConsumerOp.Batch<>();
-        result.setTtlOfMillis(this.constr.getStoreProps().getAddition().getTtl().toMillis());
+    public ProviderOp.Batch list(CacheBatchQuery query) {
+        ProviderOp.Batch result = new ProviderOp.Batch();
+        result.setTtlOfSeconds(this.constr.getStoreProps().getAddition().getTtl().toSeconds());
         SearchResult sr = this.constr.jedisPooled.ftSearch(this.constr.indexName, this.toQuery(query));
         if (sr.getTotalResults() > 0) {
+            ProviderCacheStore[] stores = new ProviderCacheStore[Math.toIntExact(sr.getTotalResults())];
             try {
-                for (Document document : sr.getDocuments()) {
-                    result.getData().add(
+                for (int i = 0; i < sr.getDocuments().size(); i++) {
+                    stores[i] =
                             this.constr.objectMapper.readValue(
-                                    document.getString("$"),
-                                    this.constr.getStoreProps().getStoreClassName()
-                            )
-                    );
+                                    sr.getDocuments().get(i).getString("$"),
+                                    ProviderCacheStore.class
+                            );
                 }
             } catch (JsonProcessingException e) {
-                logger.error(OP_FAILED + this.getConsumerIdentifier(), e);
+                logger.error(OP_FAILED, this.getConsumerIdentifier(), e);
             }
+            result.setData(stores);
         }
 
         return result;
@@ -129,10 +129,10 @@ public class JedisProvider extends CacheProvider {
     public boolean delete(CacheBatchQuery query) {
         boolean finish = false;
         while (!finish) {
-            ConsumerOp.Batch<CacheDto> batch = this.list(query);
-            if (CollectionUtils.isNotEmpty(batch.getData())) {
+            ProviderOp.Batch batch = this.list(query);
+            if (ArrayUtils.isNotEmpty(batch.getData())) {
                 this.constr.jedisPooled.del(
-                        batch.getData().stream()
+                        Arrays.stream(batch.getData())
                                 .map(dto -> this.buildRedisKey(dto.getCacheKey()))
                                 .toArray(String[]::new)
                 );
@@ -160,9 +160,9 @@ public class JedisProvider extends CacheProvider {
             query.setSortDirection(CacheQuery.Sort.Direction.DESC);
             query.setLimit(1L);
 
-            ConsumerOp.Batch<CacheDto> dto = this.list(query);
-            result.setCreatedDtm(dto.getData().get(0).getEffectedDtm());
-            result.setMaxUpdatedDtm(dto.getData().get(0).getUpdatedDtm());
+            ProviderOp.Batch dto = this.list(query);
+            result.setCreatedDtm(dto.getData()[0].getEffectedDtm());
+            result.setMaxUpdatedDtm(dto.getData()[0].getUpdatedDtm());
         }
 
         return result;

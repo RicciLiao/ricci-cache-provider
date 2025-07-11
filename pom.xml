@@ -47,10 +47,16 @@
         <dependency>
             <groupId>ricciliao.x</groupId>
             <artifactId>components-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>ricciliao.x</groupId>
+                    <artifactId>cache-consumer-component</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>ricciliao.x</groupId>
-            <artifactId>cache-provider</artifactId>
+            <artifactId>cache-common-component</artifactId>
         </dependency>
 
         <dependency>

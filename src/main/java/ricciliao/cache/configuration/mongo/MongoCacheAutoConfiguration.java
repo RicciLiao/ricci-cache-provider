@@ -5,9 +5,7 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.MongoDriverInformation;
 import com.mongodb.client.MongoClients;
-import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -21,13 +19,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.component.MongoTemplateProvider;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
-import ricciliao.x.component.utils.CoreUtils;
 import ricciliao.x.starter.PropsAutoConfiguration;
-
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Set;
 
 @PropsAutoConfiguration(
         properties = MongoCacheAutoProperties.class,
@@ -57,7 +49,6 @@ public class MongoCacheAutoConfiguration {
         construct.setStoreProps(props);
 
         providerSelector.getCacheProviderMap().put(identifier, new MongoTemplateProvider(construct));
-        providerSelector.getCacheClassMap().put(identifier, props.getStoreClassName());
         providerSelector.getCacheStaticalMap().put(identifier, props.getAddition().getStatical());
     }
 
@@ -82,12 +73,10 @@ public class MongoCacheAutoConfiguration {
         MongoCustomConversions customConversions =
                 MongoCustomConversions.create(adapter -> {
                     adapter.useNativeDriverJavaTimeCodecs();
-                    adapter.registerConverter(new LocalDateTime2Date());
-                    adapter.registerConverter(new Date2LocalDateTime());
                 });
 
         MongoMappingContext mappingContext = new MongoMappingContext();
-        mappingContext.setInitialEntitySet(Set.of(props.getStoreClassName()));
+        /*mappingContext.setInitialEntitySet(Set.of(props.getStoreClassName()));*/
         mappingContext.setSimpleTypeHolder(customConversions.getSimpleTypeHolder());
         mappingContext.setFieldNamingStrategy(PropertyNameFieldNamingStrategy.INSTANCE);
         mappingContext.setAutoIndexCreation(false);
@@ -110,33 +99,6 @@ public class MongoCacheAutoConfiguration {
         );
 
         return mongoTemplate;
-    }
-
-    static class LocalDateTime2Date implements Converter<LocalDateTime, Date> {
-
-        @Override
-        public Date convert(@Nullable LocalDateTime source) {
-            Long timestamp = CoreUtils.toLong(source);
-            if (Objects.isNull(timestamp)) {
-
-                return null;
-            }
-
-            return new Date(timestamp);
-        }
-    }
-
-    static class Date2LocalDateTime implements Converter<Date, LocalDateTime> {
-
-        @Override
-        public LocalDateTime convert(@Nullable Date source) {
-            if (Objects.isNull(source)) {
-
-                return null;
-            }
-
-            return CoreUtils.toLocalDateTime(source.getTime());
-        }
     }
 
 }

@@ -66,7 +66,6 @@ public class RedisCacheAutoConfiguration {
         construct.setStoreProps(props);
 
         providerSelector.getCacheProviderMap().put(identifier, new JedisProvider(construct));
-        providerSelector.getCacheClassMap().put(identifier, props.getStoreClassName());
         providerSelector.getCacheStaticalMap().put(identifier, props.getAddition().getStatical());
         this.createIndex(jedisPool, indexName, keyPrefix);
     }
