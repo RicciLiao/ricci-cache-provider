@@ -3,8 +3,8 @@ package ricciliao.cache.component;
 
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.BeanCreationException;
-import ricciliao.cache.ProviderCacheStore;
-import ricciliao.cache.ProviderOp;
+import ricciliao.cache.pojo.ProviderCacheStore;
+import ricciliao.cache.pojo.ProviderOp;
 import ricciliao.cache.properties.ProviderCacheProperties;
 import ricciliao.x.cache.pojo.CacheStore;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;

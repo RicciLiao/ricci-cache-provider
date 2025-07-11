@@ -20,7 +20,7 @@ public class RedisCacheAutoProperties extends ApplicationProperties {
         this.consumerList = consumerList;
     }
 
-    public static class ConsumerProperties extends ProviderCacheProperties.ConsumerProperties<ConsumerProperties.StoreProperties> {
+    public static class ConsumerProperties extends ProviderCacheProperties.ProviderProperties<ConsumerProperties.StoreProperties> {
 
         private List<StoreProperties> storeList = new ArrayList<>();
 

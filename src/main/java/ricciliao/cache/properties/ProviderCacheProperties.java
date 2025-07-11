@@ -9,7 +9,7 @@ public class ProviderCacheProperties {
 
     }
 
-    public abstract static class ConsumerProperties<T extends StoreProperties> {
+    public abstract static class ProviderProperties<T extends StoreProperties> {
         private String consumer;
 
         public String getConsumer() {

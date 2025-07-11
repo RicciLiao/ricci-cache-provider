@@ -1,4 +1,4 @@
-package ricciliao.cache;
+package ricciliao.cache.pojo;
 
 
 import ricciliao.x.cache.pojo.CacheStore;

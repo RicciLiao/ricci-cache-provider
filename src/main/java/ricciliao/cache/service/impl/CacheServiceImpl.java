@@ -3,9 +3,9 @@ package ricciliao.cache.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ricciliao.cache.ProviderCacheStore;
-import ricciliao.cache.ProviderOp;
 import ricciliao.cache.component.CacheProviderSelector;
+import ricciliao.cache.pojo.ProviderCacheStore;
+import ricciliao.cache.pojo.ProviderOp;
 import ricciliao.cache.service.CacheService;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
 import ricciliao.x.cache.pojo.ProviderInfo;

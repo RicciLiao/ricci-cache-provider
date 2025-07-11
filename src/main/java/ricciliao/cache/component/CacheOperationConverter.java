@@ -7,7 +7,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import ricciliao.cache.ProviderOp;
+import ricciliao.cache.pojo.ProviderOp;
 import ricciliao.x.cache.XCacheConstants;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
 import ricciliao.x.component.exception.CmnParameterException;

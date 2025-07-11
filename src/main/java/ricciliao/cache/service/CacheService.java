@@ -1,7 +1,7 @@
 package ricciliao.cache.service;
 
 
-import ricciliao.cache.ProviderOp;
+import ricciliao.cache.pojo.ProviderOp;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
 import ricciliao.x.cache.pojo.ProviderInfo;
 import ricciliao.x.cache.query.CacheBatchQuery;
