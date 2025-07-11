@@ -6,7 +6,6 @@
 
 Please refer to `dependencies-control-center` for the version number.
 
-
 | groupId                  | artifactId                          | scope   |
 |--------------------------|-------------------------------------|---------|
 | org.springframework.boot | spring-boot-starter-web             | compile |
@@ -110,21 +109,21 @@ public abstract static class AdditionalProperties {
 
 * #### ProviderProperties.class
 
-  * `consumer`: define the identity code of service which will use this provider,
-    like A service use A as code, B service as B.
+    * `consumer`: define the identity code of service which will use this provider,
+      like A service use A as code, B service as B.
 * #### StoreProperties.class
 
-  * `store`: define the identity code of data which from the consumer.
-  * `host`: MongoDB or Redis host.
-  * `port`: MongoDB or Redis port.
-  * `password`: MongoDB or Redis password.
-  * `database`: MongoDB scheme or Redis DB index.
-  * `storeClassName`: your data POJO class, it must extends `CacheDto.class`.
+    * `store`: define the identity code of data which from the consumer.
+    * `host`: MongoDB or Redis host.
+    * `port`: MongoDB or Redis port.
+    * `password`: MongoDB or Redis password.
+    * `database`: MongoDB scheme or Redis DB index.
+    * `storeClassName`: your data POJO class, it must extends `CacheDto.class`.
 * #### AdditionalProperties.class
 
-  * `timeout`: connection pool timeout.
-  * `ttl`: data expired time.
-  * `statical`: true=static data, like some code list; false=dynamic data, which can be updated in real-time.
+    * `timeout`: connection pool timeout.
+    * `ttl`: data expired time.
+    * `statical`: true=static data, like some code list; false=dynamic data, which can be updated in real-time.
 * #### RedisCacheAutoProperties.class
 
 ```java
@@ -373,55 +372,55 @@ public class ProviderOpSingleConverter extends CacheOperationConverter<ProviderO
 ```java
 public class ProviderOpBatchConverter extends CacheOperationConverter<ProviderOp.Batch> {
 
-  public ProviderOpBatchConverter(ObjectMapper objectMapper,
-                                  CacheProviderSelector cacheProvider) {
-    super(objectMapper, cacheProvider);
-  }
-
-  @Override
-  protected boolean supports(@Nonnull Class<?> clazz) {
-
-    return ProviderOp.Batch.class.isAssignableFrom(clazz);
-  }
-
-  @Nonnull
-  @Override
-  protected ProviderOp.Batch readInternal(@Nonnull HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-    JsonNode jsonNode = objectMapper.readTree(inputMessage.getBody());
-    CacheOperation<CacheStore<?>[]> op = objectMapper.convertValue(jsonNode, new TypeReference<>() {
-    });
-    ProviderCacheStore[] stores =
-            Arrays.stream(op.getData()).map(store -> {
-                      ProviderCacheStore providerCacheStore = new ProviderCacheStore();
-                      providerCacheStore.setCacheKey(store.getCacheKey());
-                      providerCacheStore.setCreatedDtm(store.getCreatedDtm());
-                      providerCacheStore.setUpdatedDtm(store.getUpdatedDtm());
-                      providerCacheStore.setEffectedDtm(store.getEffectedDtm());
-                      String data = SneakyThrowUtils.get(() -> objectMapper.writeValueAsString(store.getData()));
-                      providerCacheStore.setData(SneakyThrowUtils.get(() -> objectMapper.writeValueAsBytes(data)));
-
-                      return providerCacheStore;
-                    })
-                    .toArray(ProviderCacheStore[]::new);
-    op.setData(stores);
-
-    return objectMapper.convertValue(op, new TypeReference<>() {
-    });
-  }
-
-  @Override
-  protected void writeInternal(@Nonnull ProviderOp.Batch batch, @Nonnull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-    CacheOperation<CacheStore<Serializable>[]> op = objectMapper.convertValue(batch, new TypeReference<>() {
-    });
-    for (CacheStore<Serializable> datum : op.getData()) {
-      String data = objectMapper.readValue((byte[]) datum.getData(), String.class);
-      datum.setData((Serializable) objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
-      }));
+    public ProviderOpBatchConverter(ObjectMapper objectMapper,
+                                    CacheProviderSelector cacheProvider) {
+        super(objectMapper, cacheProvider);
     }
 
+    @Override
+    protected boolean supports(@Nonnull Class<?> clazz) {
 
-    objectMapper.writeValue(outputMessage.getBody(), ResponseUtils.successResponse(op));
-  }
+        return ProviderOp.Batch.class.isAssignableFrom(clazz);
+    }
+
+    @Nonnull
+    @Override
+    protected ProviderOp.Batch readInternal(@Nonnull HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+        JsonNode jsonNode = objectMapper.readTree(inputMessage.getBody());
+        CacheOperation<CacheStore<?>[]> op = objectMapper.convertValue(jsonNode, new TypeReference<>() {
+        });
+        ProviderCacheStore[] stores =
+                Arrays.stream(op.getData()).map(store -> {
+                            ProviderCacheStore providerCacheStore = new ProviderCacheStore();
+                            providerCacheStore.setCacheKey(store.getCacheKey());
+                            providerCacheStore.setCreatedDtm(store.getCreatedDtm());
+                            providerCacheStore.setUpdatedDtm(store.getUpdatedDtm());
+                            providerCacheStore.setEffectedDtm(store.getEffectedDtm());
+                            String data = SneakyThrowUtils.get(() -> objectMapper.writeValueAsString(store.getData()));
+                            providerCacheStore.setData(SneakyThrowUtils.get(() -> objectMapper.writeValueAsBytes(data)));
+
+                            return providerCacheStore;
+                        })
+                        .toArray(ProviderCacheStore[]::new);
+        op.setData(stores);
+
+        return objectMapper.convertValue(op, new TypeReference<>() {
+        });
+    }
+
+    @Override
+    protected void writeInternal(@Nonnull ProviderOp.Batch batch, @Nonnull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+        CacheOperation<CacheStore<Serializable>[]> op = objectMapper.convertValue(batch, new TypeReference<>() {
+        });
+        for (CacheStore<Serializable> datum : op.getData()) {
+            String data = objectMapper.readValue((byte[]) datum.getData(), String.class);
+            datum.setData((Serializable) objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
+            }));
+        }
+
+
+        objectMapper.writeValue(outputMessage.getBody(), ResponseUtils.successResponse(op));
+    }
 }
 ```
 
@@ -433,7 +432,7 @@ public class ProviderOpBatchConverter extends CacheOperationConverter<ProviderOp
 
 ```java
 public interface ConsumerCacheData extends ResponseData {
-  String generateCacheKey();
+    String generateCacheKey();
 }
 ```
 
@@ -456,11 +455,11 @@ Definition of consumer data structure.
 
 ```java
 public class ConsumerOp<T extends Serializable> extends CacheOperation<T> {
-  public static class Single<T extends ConsumerCacheData> extends ConsumerOp<ConsumerCacheStore<T>> {
-  }
+    public static class Single<T extends ConsumerCacheData> extends ConsumerOp<ConsumerCacheStore<T>> {
+    }
 
-  public static class Batch<T extends ConsumerCacheData> extends ConsumerOp<ConsumerCacheStore<T>[]> {
-  }
+    public static class Batch<T extends ConsumerCacheData> extends ConsumerOp<ConsumerCacheStore<T>[]> {
+    }
 }
 ```
 
@@ -498,26 +497,26 @@ You can use this POJO to retrieve a list of data by your criteria in consumer.
 
 * ### 💱 Workflow
 
-![saving.png](assets/saving.png)
+![saving.png](assets/saving.png?t=1752227661528)
 
 ---
 
 * ### 🎯 Interface
 
-  * *POST* `/operation`
-    Create a new record for the consumer(with identifier).
-  * *PUT* `/operation`
-    Update a existed record for the consumer(with identifier).
-  * *DELETE* `/operation/{id}`
-    Delete a existed record for the consumer(with identifier).
-  * *GET* `/operation/{id}`
-    Retrieve a existed record for the consumer(with identifier).
-  * *POST* `/operation/batch`
-    Batch create new records for the consumer(with identifier).
-  * *POST* `/operation/list`
-    Retrieve list of existed record for the consumer(with identifier).
-  * *GET* `/operation/extra/providerInfo`
-    Retrieve provider information for the consumer(with identifier).
+    * *POST* `/operation`
+      Create a new record for the consumer(with identifier).
+    * *PUT* `/operation`
+      Update a existed record for the consumer(with identifier).
+    * *DELETE* `/operation/{id}`
+      Delete a existed record for the consumer(with identifier).
+    * *GET* `/operation/{id}`
+      Retrieve a existed record for the consumer(with identifier).
+    * *POST* `/operation/batch`
+      Batch create new records for the consumer(with identifier).
+    * *POST* `/operation/list`
+      Retrieve list of existed record for the consumer(with identifier).
+    * *GET* `/operation/extra/providerInfo`
+      Retrieve provider information for the consumer(with identifier).
 
 ---
 
