@@ -495,12 +495,6 @@ You can use this POJO to retrieve a list of data by your criteria in consumer.
 
 ---
 
-* ### 💱 Workflow
-
-![saving.png](assets/saving.png?t=1752227661528)
-
----
-
 * ### 🎯 Interface
 
     * *POST* `/operation`
@@ -517,6 +511,23 @@ You can use this POJO to retrieve a list of data by your criteria in consumer.
       Retrieve list of existed record for the consumer(with identifier).
     * *GET* `/operation/extra/providerInfo`
       Retrieve provider information for the consumer(with identifier).
+
+---
+
+* ### 💱 Workflow
+
+    * *POST* `/operation`
+    * *PUT* `/operation`
+    * *POST* `/operation/batch`
+
+![saving.png](assets/saving.png)
+
+---
+
+* *GET* `/operation/{id}`
+* *POST* `/operation/list`
+
+![retrieval.png](assets/retrieval.png)
 
 ---
 
