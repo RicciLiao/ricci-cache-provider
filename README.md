@@ -516,18 +516,15 @@ You can use this POJO to retrieve a list of data by your criteria in consumer.
 
 * ### 💱 Workflow
 
-    * *POST* `/operation`
-    * *PUT* `/operation`
-    * *POST* `/operation/batch`
-
-![saving.png](assets/saving.png)
-
----
-
-* *GET* `/operation/{id}`
-* *POST* `/operation/list`
-
-![retrieval.png](assets/retrieval.png)
+    1.
+        * *POST* `/operation`
+        * *PUT* `/operation`
+        * *POST* `/operation/batch`
+          ![saving.png](assets/saving.png)
+    2.
+        * *GET* `/operation/{id}`
+        * *POST* `/operation/list`
+          ![retrieval.png](assets/retrieval.png)
 
 ---
 
