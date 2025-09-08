@@ -3,6 +3,7 @@ package ricciliao.cache.component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.Nonnull;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -11,7 +12,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import ricciliao.cache.pojo.ProviderOp;
 import ricciliao.x.cache.pojo.CacheOperation;
 import ricciliao.x.cache.pojo.CacheStore;
-import ricciliao.x.component.response.ResponseUtils;
+import ricciliao.x.component.response.code.ResponseCode;
+import ricciliao.x.component.response.code.impl.ResponseCodeEnum;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -51,6 +53,16 @@ public class ProviderOpSingleConverter extends CacheOperationConverter<ProviderO
         op.getData().setData((Serializable) objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
         }));
 
-        objectMapper.writeValue(outputMessage.getBody(), ResponseUtils.successResponse(op));
+        ObjectNode codeNode = objectMapper.createObjectNode();
+        ResponseCode code = ResponseCodeEnum.SUCCESS;
+        String id = String.format("%d%03d", code.getPrimary().getId(), code.getSecondary().getId());
+        String message = code.getPrimary().getMessage();
+        codeNode.put("id", id);
+        codeNode.put("message", message);
+        ObjectNode responseNode = objectMapper.createObjectNode();
+        responseNode.set("code", codeNode);
+        responseNode.set("data", objectMapper.valueToTree(op));
+
+        objectMapper.writeValue(outputMessage.getBody(), responseNode);
     }
 }

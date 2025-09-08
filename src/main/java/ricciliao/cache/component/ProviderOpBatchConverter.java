@@ -69,6 +69,6 @@ public class ProviderOpBatchConverter extends CacheOperationConverter<ProviderOp
         }
 
 
-        objectMapper.writeValue(outputMessage.getBody(), ResponseUtils.successResponse(op));
+        objectMapper.writeValue(outputMessage.getBody(), ResponseUtils.success(op));
     }
 }

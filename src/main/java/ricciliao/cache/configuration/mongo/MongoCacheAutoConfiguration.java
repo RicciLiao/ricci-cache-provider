@@ -71,12 +71,9 @@ public class MongoCacheAutoConfiguration {
                 );
 
         MongoCustomConversions customConversions =
-                MongoCustomConversions.create(adapter -> {
-                    adapter.useNativeDriverJavaTimeCodecs();
-                });
+                MongoCustomConversions.create(MongoCustomConversions.MongoConverterConfigurationAdapter::useNativeDriverJavaTimeCodecs);
 
         MongoMappingContext mappingContext = new MongoMappingContext();
-        /*mappingContext.setInitialEntitySet(Set.of(props.getStoreClassName()));*/
         mappingContext.setSimpleTypeHolder(customConversions.getSimpleTypeHolder());
         mappingContext.setFieldNamingStrategy(PropertyNameFieldNamingStrategy.INSTANCE);
         mappingContext.setAutoIndexCreation(false);

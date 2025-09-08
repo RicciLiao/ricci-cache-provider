@@ -10,6 +10,7 @@ public class ProviderCacheStore extends CacheStore<byte[]> {
     private static final long serialVersionUID = -1634685567608547710L;
 
     public ProviderCacheStore() {
+        //default
     }
 
 }
