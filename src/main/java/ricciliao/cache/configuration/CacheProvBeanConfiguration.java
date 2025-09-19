@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -14,6 +16,7 @@ import ricciliao.cache.component.ProviderOpBatchConverter;
 import ricciliao.cache.component.ProviderOpSingleConverter;
 import ricciliao.cache.configuration.mongo.MongoCacheAutoConfiguration;
 import ricciliao.cache.configuration.redis.RedisCacheAutoConfiguration;
+import ricciliao.x.starter.common.CommonAutoConfiguration;
 
 import java.util.List;
 
@@ -22,6 +25,15 @@ import java.util.List;
         MongoCacheAutoConfiguration.class,
         RedisCacheAutoConfiguration.class
 })
+@ComponentScan(
+        excludeFilters =
+        @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = {
+                        CommonAutoConfiguration.CommonWebMvcConfiguration.class
+                }
+        )
+)
 public class CacheProvBeanConfiguration implements WebMvcConfigurer {
 
     private ObjectMapper objectMapper;

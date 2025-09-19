@@ -9,15 +9,18 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import ricciliao.cache.pojo.ProviderCacheStore;
 import ricciliao.cache.pojo.ProviderOp;
 import ricciliao.x.cache.pojo.CacheOperation;
 import ricciliao.x.cache.pojo.CacheStore;
 import ricciliao.x.component.response.code.ResponseCode;
 import ricciliao.x.component.response.code.impl.ResponseCodeEnum;
+import ricciliao.x.component.response.data.SimpleData;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Objects;
 
 public class ProviderOpSingleConverter extends CacheOperationConverter<ProviderOp.Single> {
 
@@ -47,22 +50,34 @@ public class ProviderOpSingleConverter extends CacheOperationConverter<ProviderO
 
     @Override
     protected void writeInternal(@Nonnull ProviderOp.Single single, @Nonnull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-        String data = objectMapper.readValue(single.getData().getData(), String.class);
-        CacheOperation<CacheStore<Serializable>> op = objectMapper.convertValue(single, new TypeReference<>() {
-        });
-        op.getData().setData((Serializable) objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
-        }));
+        ObjectNode responseNode = objectMapper.createObjectNode();
+        if (Objects.isNull(single.getData())) {
+            CacheOperation<SimpleData> op = new CacheOperation<>(SimpleData.blank());
+            responseNode.set("data", objectMapper.valueToTree(SimpleData.blank()));
+        } else {
+            CacheOperation<CacheStore<LinkedHashMap<String, Serializable>>> op =
+                    new CacheOperation<>(single.getTtlOfSeconds(), this.resume(single.getData()));
+            responseNode.set("data", objectMapper.valueToTree(op));
+        }
 
         ObjectNode codeNode = objectMapper.createObjectNode();
         ResponseCode code = ResponseCodeEnum.SUCCESS;
-        String id = String.format("%d%03d", code.getPrimary().getId(), code.getSecondary().getId());
-        String message = code.getPrimary().getMessage();
-        codeNode.put("id", id);
-        codeNode.put("message", message);
-        ObjectNode responseNode = objectMapper.createObjectNode();
+        codeNode.put("id", String.format("%d%03d", code.getPrimary().getId(), code.getSecondary().getId()));
+        codeNode.put("message", code.getPrimary().getMessage());
         responseNode.set("code", codeNode);
-        responseNode.set("data", objectMapper.valueToTree(op));
 
         objectMapper.writeValue(outputMessage.getBody(), responseNode);
+    }
+
+    private CacheStore<LinkedHashMap<String, Serializable>> resume(ProviderCacheStore store) throws IOException {
+        CacheStore<LinkedHashMap<String, Serializable>> result = new CacheStore<>();
+        result.setCacheKey(store.getCacheKey());
+        result.setCreatedDtm(store.getCreatedDtm());
+        result.setUpdatedDtm(store.getUpdatedDtm());
+        result.setEffectedDtm(store.getEffectedDtm());
+        result.setData(objectMapper.readValue(objectMapper.readValue(store.getData(), String.class), new TypeReference<>() {
+        }));
+
+        return result;
     }
 }
