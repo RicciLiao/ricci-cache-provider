@@ -38,6 +38,8 @@ ricciliao:
   x:
     common:
       time-zone: GMT+8
+      consumer: cache-provider
+      version: ${project.version}
     log:
       executor:
         enable: false

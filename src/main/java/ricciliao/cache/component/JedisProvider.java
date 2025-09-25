@@ -13,8 +13,8 @@ import ricciliao.cache.pojo.ProviderOp;
 import ricciliao.x.cache.pojo.ProviderInfo;
 import ricciliao.x.cache.query.CacheBatchQuery;
 import ricciliao.x.cache.query.CacheQuery;
-import ricciliao.x.log.AuditLoggerFactory;
-import ricciliao.x.log.logger.AuditLogger;
+import ricciliao.x.log.api.XLogger;
+import ricciliao.x.log.api.XLoggerFactory;
 
 import java.lang.reflect.Field;
 import java.time.temporal.Temporal;
@@ -24,7 +24,7 @@ import java.util.Objects;
 
 public class JedisProvider extends CacheProvider {
 
-    private static final AuditLogger logger = AuditLoggerFactory.getLogger(JedisProvider.class);
+    private static final XLogger logger = XLoggerFactory.getLogger(JedisProvider.class);
     private static final String Q_NUMBER_LUA = " @%s: [%s %s] ";
     private static final String Q_TEXT_LUA = " @%s: %s ";
     private static final String OP_FAILED = "Cannot operate cache for {}";
