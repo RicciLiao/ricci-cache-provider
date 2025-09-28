@@ -34,6 +34,14 @@ cache-provider:
             database: bsm
             addition:
               ttl: 120s
+          - store: signUpLock
+            host: ${MONGODB_HOST}
+            port: ${MONGODB_PORT}
+            password: ${MONGODB_PASSWORD}
+            database: bsm
+            addition:
+              ttl: 120s
+              statical: true
 ricciliao:
   x:
     common:
