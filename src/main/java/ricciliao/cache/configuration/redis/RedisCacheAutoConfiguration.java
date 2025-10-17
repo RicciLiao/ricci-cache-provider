@@ -16,7 +16,7 @@ import redis.clients.jedis.search.IndexDefinition;
 import redis.clients.jedis.search.IndexOptions;
 import redis.clients.jedis.search.Schema;
 import ricciliao.cache.component.CacheProviderSelector;
-import ricciliao.cache.component.JedisProvider;
+import ricciliao.cache.provider.JedisProvider;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
 import ricciliao.x.starter.PropsAutoConfiguration;
 
@@ -38,7 +38,7 @@ public class RedisCacheAutoConfiguration {
         for (RedisCacheAutoProperties.ConsumerProperties consumerProps : props.getConsumerList()) {
             for (RedisCacheAutoProperties.ConsumerProperties.StoreProperties storeProps : consumerProps.getStoreList()) {
                 this.createWrapper(
-                        new ConsumerIdentifier(consumerProps.getConsumer(), storeProps.getStore()),
+                        new ConsumerIdentifier(consumerProps.getConsumer(), storeProps.getStoreName()),
                         objectMapper,
                         storeProps,
                         providerSelector
@@ -52,7 +52,7 @@ public class RedisCacheAutoConfiguration {
                                RedisCacheAutoProperties.ConsumerProperties.StoreProperties props,
                                CacheProviderSelector providerSelector) throws IOException {
         String keyPrefix = "db" + props.getDatabase();
-        String indexName = keyPrefix + "_" + props.getStore() + "_index";
+        String indexName = keyPrefix + "_" + props.getStoreName() + "_index";
         String upsertLua = this.loadLuaScript("redis_upsert.lua");
         JedisPooled jedisPool = this.jedisPool(props);
 

@@ -6,13 +6,14 @@ import org.springframework.stereotype.Service;
 import ricciliao.cache.component.CacheProviderSelector;
 import ricciliao.cache.pojo.ProviderCacheStore;
 import ricciliao.cache.pojo.ProviderOp;
+import ricciliao.cache.provider.AbstractCacheProvider;
 import ricciliao.cache.service.CacheService;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
 import ricciliao.x.cache.pojo.ProviderInfo;
 import ricciliao.x.cache.query.CacheBatchQuery;
 import ricciliao.x.component.random.RandomGenerator;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 @Service("cacheService")
@@ -26,16 +27,23 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
-    public String create(ConsumerIdentifier identifier, ProviderOp.Single operation) {
-        LocalDateTime now = LocalDateTime.now();
-        operation.getData().setEffectedDtm(now);
-        if (Boolean.TRUE.equals(providerSelector.isStatical(identifier))) {
-            operation.getData().setCreatedDtm(now);
-            operation.getData().setUpdatedDtm(operation.getData().getCreatedDtm());
+    public String create(ConsumerIdentifier identifier, ProviderCacheStore store) {
+        Instant now = Instant.now();
+        AbstractCacheProvider provider = providerSelector.selectProvider(identifier);
+        Long ttl = provider.getStoreProps().getAddition().getTtl().getSeconds();
+        if (Objects.isNull(store.getTtlSec())) {
+            store.setTtlEffectedDtm(now);
         } else {
-            operation.getData().setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
-            operation.getData().setCreatedDtm(now);
-            operation.getData().setUpdatedDtm(now);
+            store.setTtlEffectedDtm(now.plusSeconds(store.getTtlSec() - ttl));
+        }
+        store.setTtlSec(ttl);
+        if (Boolean.TRUE.equals(providerSelector.isStatical(identifier))) {
+            store.setCreatedDtm(now);
+            store.setUpdatedDtm(store.getCreatedDtm());
+        } else {
+            store.setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());
+            store.setCreatedDtm(now);
+            store.setUpdatedDtm(now);
         }
         providerSelector.selectProvider(identifier).create(operation);
 
@@ -53,7 +61,7 @@ public class CacheServiceImpl implements CacheService {
         updating.getData().setEffectedDtm(existing.getData().getEffectedDtm());
         updating.getData().setCreatedDtm(existing.getData().getCreatedDtm());
         if (Boolean.FALSE.equals(providerSelector.isStatical(identifier))) {
-            updating.getData().setUpdatedDtm(LocalDateTime.now());
+            updating.getData().setUpdatedDtm(Instant.now());
         }
 
         return providerSelector.selectProvider(identifier).update(updating);
@@ -96,7 +104,7 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public boolean create(ConsumerIdentifier identifier, ProviderOp.Batch operation) {
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
         if (Boolean.FALSE.equals(providerSelector.isStatical(identifier))) {
             for (ProviderCacheStore cache : operation.getData()) {
                 cache.setCacheKey(RandomGenerator.nextString(12).allAtLeast(3).generate());

@@ -1,15 +1,15 @@
-package ricciliao.cache.component;
+package ricciliao.cache.provider;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import redis.clients.jedis.JedisPooled;
+import redis.clients.jedis.search.Document;
 import redis.clients.jedis.search.Query;
 import redis.clients.jedis.search.SearchResult;
 import ricciliao.cache.common.CacheConstants;
 import ricciliao.cache.pojo.ProviderCacheStore;
-import ricciliao.cache.pojo.ProviderOp;
 import ricciliao.x.cache.pojo.ProviderInfo;
 import ricciliao.x.cache.query.CacheBatchQuery;
 import ricciliao.x.cache.query.CacheQuery;
@@ -18,11 +18,13 @@ import ricciliao.x.log.api.XLoggerFactory;
 
 import java.lang.reflect.Field;
 import java.time.temporal.Temporal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
-public class JedisProvider extends CacheProvider {
+public class JedisProvider extends AbstractCacheProvider {
 
     private static final XLogger logger = XLoggerFactory.getLogger(JedisProvider.class);
     private static final String Q_NUMBER_LUA = " @%s: [%s %s] ";
@@ -38,16 +40,16 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public boolean create(ProviderOp.Single operation) {
+    public boolean create(ProviderCacheStore store) {
         try {
 
             return 1L ==
                     Long.parseLong(
                             this.constr.jedisPooled.evalsha(
                                     this.upsertScript,
-                                    Collections.singletonList(this.buildRedisKey(operation.getData().getCacheKey())),
+                                    Collections.singletonList(this.buildRedisKey(store.getCacheKey())),
                                     Arrays.asList(
-                                            this.constr.objectMapper.writeValueAsString(operation.getData()),
+                                            this.constr.objectMapper.writeValueAsString(store),
                                             String.valueOf(this.getStoreProps().getAddition().getTtl().getSeconds()),
                                             String.valueOf(1)
                                     )
@@ -61,37 +63,34 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public boolean update(ProviderOp.Single operation) {
+    public boolean update(ProviderCacheStore store) {
         try {
 
             return 1L ==
                     Long.parseLong(
                             this.constr.jedisPooled.evalsha(
                                     this.upsertScript,
-                                    Collections.singletonList(this.buildRedisKey(operation.getData().getCacheKey())),
+                                    Collections.singletonList(this.buildRedisKey(store.getCacheKey())),
                                     Arrays.asList(
-                                            this.constr.objectMapper.writeValueAsString(operation.getData()),
-                                            String.valueOf(this.getAdditionalProps().getTtl().getSeconds()),
+                                            this.constr.objectMapper.writeValueAsString(store),
+                                            String.valueOf(this.getStoreProps().getAddition().getTtl().getSeconds()),
                                             String.valueOf(0)
                                     )
                             ).toString()
                     );
         } catch (Exception e) {
-            logger.error(OP_FAILED + this.getConsumerIdentifier(), e);
+            logger.error(OP_FAILED, this.getConsumerIdentifier(), e);
 
             return false;
         }
     }
 
     @Override
-    public ProviderOp.Single get(String key) {
+    public ProviderCacheStore get(String key) {
 
-        return new ProviderOp.Single(
-                this.getStoreProps().getAddition().getTtl().toSeconds(),
-                this.constr.objectMapper.convertValue(
-                        this.constr.jedisPooled.jsonGet(this.buildRedisKey(key)),
-                        ProviderCacheStore.class
-                )
+        return this.constr.objectMapper.convertValue(
+                this.constr.jedisPooled.jsonGet(this.buildRedisKey(key)),
+                ProviderCacheStore.class
         );
     }
 
@@ -102,37 +101,34 @@ public class JedisProvider extends CacheProvider {
     }
 
     @Override
-    public ProviderOp.Batch list(CacheBatchQuery query) {
-        ProviderOp.Batch result = new ProviderOp.Batch();
-        result.setTtlOfSeconds(this.constr.getStoreProps().getAddition().getTtl().toSeconds());
+    public ProviderCacheStore.Batch list(CacheBatchQuery query) {
         SearchResult sr = this.constr.jedisPooled.ftSearch(this.constr.indexName, this.toQuery(query));
-        if (sr.getTotalResults() > 0) {
-            ProviderCacheStore[] stores = new ProviderCacheStore[Math.toIntExact(sr.getTotalResults())];
-            try {
-                for (int i = 0; i < sr.getDocuments().size(); i++) {
-                    stores[i] =
-                            this.constr.objectMapper.readValue(
-                                    sr.getDocuments().get(i).getString("$"),
-                                    ProviderCacheStore.class
-                            );
-                }
-            } catch (JsonProcessingException e) {
-                logger.error(OP_FAILED, this.getConsumerIdentifier(), e);
-            }
-            result.setData(stores);
+        if (sr.getTotalResults() == 0) {
+
+            return new ProviderCacheStore.Batch(Collections.emptyList());
         }
 
-        return result;
+        List<ProviderCacheStore> storeList = new ArrayList<>(Math.toIntExact(sr.getTotalResults()));
+        try {
+            for (Document document : sr.getDocuments()) {
+                storeList.add(this.constr.objectMapper.readValue(document.getString("$"), ProviderCacheStore.class));
+            }
+        } catch (JsonProcessingException e) {
+            logger.error(OP_FAILED, this.getConsumerIdentifier(), e);
+        }
+
+        return new ProviderCacheStore.Batch(storeList);
     }
 
     @Override
     public boolean delete(CacheBatchQuery query) {
         boolean finish = false;
         while (!finish) {
-            ProviderOp.Batch batch = this.list(query);
-            if (ArrayUtils.isNotEmpty(batch.getData())) {
+            ProviderCacheStore.Batch batch = this.list(query);
+            if (CollectionUtils.isNotEmpty(batch.batch())) {
                 this.constr.jedisPooled.del(
-                        Arrays.stream(batch.getData())
+                        batch.batch()
+                                .stream()
                                 .map(dto -> this.buildRedisKey(dto.getCacheKey()))
                                 .toArray(String[]::new)
                 );
@@ -160,9 +156,9 @@ public class JedisProvider extends CacheProvider {
             query.setSortDirection(CacheQuery.Sort.Direction.DESC);
             query.setLimit(1L);
 
-            ProviderOp.Batch dto = this.list(query);
-            result.setCreatedDtm(dto.getData()[0].getEffectedDtm());
-            result.setMaxUpdatedDtm(dto.getData()[0].getUpdatedDtm());
+            ProviderCacheStore.Batch batch = this.list(query);
+            result.setCreatedDtm(batch.batch().getFirst().getCreatedDtm());
+            result.setMaxUpdatedDtm(batch.batch().getFirst().getUpdatedDtm());
         }
 
         return result;

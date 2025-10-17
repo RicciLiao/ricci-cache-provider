@@ -44,7 +44,7 @@ public class CacheOperationController {
     @Operation(description = "Update a existed record for the consumer(with identifier).")
     @PutMapping("")
     public Response<ResponseData> update(@ConsumerId ConsumerIdentifier identifier,
-                                           @RequestBody ProviderOp.Single operation) {
+                                         @RequestBody ProviderOp.Single operation) {
 
         return ResponseUtils.success(SimpleData.of(cacheService.update(identifier, operation)));
     }
@@ -52,7 +52,7 @@ public class CacheOperationController {
     @Operation(description = "Delete a existed record for the consumer(with identifier).")
     @DeleteMapping("/{id}")
     public Response<ResponseData> delete(@ConsumerId ConsumerIdentifier identifier,
-                                           @PathVariable String id) {
+                                         @PathVariable(name = "id") String id) {
 
         return ResponseUtils.success(SimpleData.of(cacheService.delete(identifier, id)));
     }
@@ -68,7 +68,7 @@ public class CacheOperationController {
     @Operation(description = "Batch create new records for the consumer(with identifier).")
     @PostMapping("/batch")
     public Response<ResponseData> create(@ConsumerId ConsumerIdentifier identifier,
-                                           @RequestBody ProviderOp.Batch operation) {
+                                         @RequestBody ProviderOp.Batch operation) {
 
         return ResponseUtils.success(SimpleData.of(cacheService.create(identifier, operation)));
     }
@@ -76,7 +76,7 @@ public class CacheOperationController {
     @Operation(description = "Batch delete existed records for the consumer(with identifier).")
     @DeleteMapping("/batch")
     public Response<ResponseData> delete(@ConsumerId ConsumerIdentifier identifier,
-                                           @RequestBody CacheBatchQuery query) {
+                                         @RequestBody CacheBatchQuery query) {
 
         return ResponseUtils.success(SimpleData.of(cacheService.delete(identifier, query)));
     }

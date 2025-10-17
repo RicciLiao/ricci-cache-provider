@@ -11,7 +11,7 @@ cache-provider:
     consumer-list:
       - consumer: message
         store-list:
-          - store: code
+          - store-name: code
             host: ${REDIS_HOST}
             port: ${REDIS_PORT}
             password: ${REDIS_PASSWORD}
@@ -27,14 +27,14 @@ cache-provider:
     consumer-list:
       - consumer: bsm
         store-list:
-          - store: challenge
+          - store-name: challenge
             host: ${MONGODB_HOST}
             port: ${MONGODB_PORT}
             password: ${MONGODB_PASSWORD}
             database: bsm
             addition:
               ttl: 120s
-          - store: signUpLock
+          - store-name: signUpLock
             host: ${MONGODB_HOST}
             port: ${MONGODB_PORT}
             password: ${MONGODB_PASSWORD}

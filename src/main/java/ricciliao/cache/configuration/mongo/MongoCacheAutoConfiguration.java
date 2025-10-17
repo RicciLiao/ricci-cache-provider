@@ -5,9 +5,7 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.MongoDriverInformation;
 import com.mongodb.client.MongoClients;
-import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -19,14 +17,9 @@ import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import ricciliao.cache.component.CacheProviderSelector;
-import ricciliao.cache.component.MongoTemplateProvider;
+import ricciliao.cache.provider.MongoTemplateProvider;
 import ricciliao.x.cache.pojo.ConsumerIdentifier;
-import ricciliao.x.component.utils.CoreUtils;
 import ricciliao.x.starter.PropsAutoConfiguration;
-
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Objects;
 
 @PropsAutoConfiguration(
         properties = MongoCacheAutoProperties.class,
@@ -39,7 +32,7 @@ public class MongoCacheAutoConfiguration {
         for (MongoCacheAutoProperties.ConsumerProperties consumerProps : props.getConsumerList()) {
             for (MongoCacheAutoProperties.ConsumerProperties.StoreProperties storeProps : consumerProps.getStoreList()) {
                 this.createWrapper(
-                        new ConsumerIdentifier(consumerProps.getConsumer(), storeProps.getStore()),
+                        new ConsumerIdentifier(consumerProps.getConsumer(), storeProps.getStoreName()),
                         storeProps,
                         providerSelector
                 );
@@ -79,8 +72,6 @@ public class MongoCacheAutoConfiguration {
 
         MongoCustomConversions customConversions =
                 MongoCustomConversions.create(adapter-> {
-                    adapter.registerConverter(new LocalDateTime2Date());
-                    adapter.registerConverter(new Date2LocalDateTime());
                 });
 
         MongoMappingContext mappingContext = new MongoMappingContext();
@@ -98,7 +89,7 @@ public class MongoCacheAutoConfiguration {
 
         MongoTemplate mongoTemplate = new MongoTemplate(databaseFactory, converter);
 
-        mongoTemplate.indexOps(props.getStore()).ensureIndex(
+        mongoTemplate.indexOps(props.getStoreName()).ensureIndex(
                 new Index()
                         .on("effectedDtm", Sort.Direction.ASC)
                         .expire(props.getAddition().getTtl())
@@ -106,33 +97,6 @@ public class MongoCacheAutoConfiguration {
         );
 
         return mongoTemplate;
-    }
-
-    static class LocalDateTime2Date implements Converter<LocalDateTime, Date> {
-
-        @Override
-        public Date convert(@Nullable LocalDateTime source) {
-            Long timestamp = CoreUtils.toLong(source);
-            if (Objects.isNull(timestamp)) {
-
-                return null;
-            }
-
-            return new Date(timestamp);
-        }
-    }
-
-    static class Date2LocalDateTime implements Converter<Date, LocalDateTime> {
-
-        @Override
-        public LocalDateTime convert(@Nullable Date source) {
-            if (Objects.isNull(source)) {
-
-                return null;
-            }
-
-            return CoreUtils.toLocalDateTime(source.getTime());
-        }
     }
 
 }
